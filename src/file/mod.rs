@@ -11,7 +11,9 @@ pub fn read_file(path: &Path) -> Result<Vec<String>, String> {
     Ok(lines)
 }
 
-pub fn write_file(path: &Path, lines: &Vec<String>) {
+pub fn write_file(path: &Path, lines: &Vec<String>) -> Result<(), String> {
     let eoln = "\n";
-    fs::write(path, lines.join(eoln));
+    fs::write(path, lines.join(eoln))
+        .map_err(|_| "cannot write commit message".to_string())?;
+    Ok(())
 }
