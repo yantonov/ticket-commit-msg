@@ -2,6 +2,7 @@ use std::path::Path;
 
 mod environment;
 mod file;
+mod ticket_number;
 
 fn entry_point() -> Result<(), String> {
     let env = environment::system_environment()?;
