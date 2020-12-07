@@ -17,3 +17,6 @@ For the ticket number app uses typical name convention (sample QUEUE-123).
 3. commit something
 
 To simplify usage for several repositories you can add install directory to the PATH.
+
+#### Links
+1. [Git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)
