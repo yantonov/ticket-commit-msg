@@ -18,5 +18,13 @@ For the ticket number app uses typical name convention (sample QUEUE-123).
 
 To simplify usage for several repositories you can add install directory to the PATH.
 
+### Customization
+You can set prefix for the ticket number using git config:
+```
+git config ticket.number.prefix 'Issue:'
+```
+Then after you commit something while an active branch is QUEUE-123:  
+the following line will be added to the commit message: "Issue: QUEUE-123".
+
 #### Links
 1. [Git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)
