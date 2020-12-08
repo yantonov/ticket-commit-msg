@@ -21,7 +21,7 @@ To simplify usage for several repositories you can add install directory to the 
 ### Customization
 You can set prefix for the ticket number using git config:
 ```
-git config ticket.number.prefix 'Issue:'
+git config ticket.number.prefix 'Issue: '
 ```
 Then after you commit something while an active branch is QUEUE-123:  
 the following line will be added to the commit message: "Issue: QUEUE-123".
