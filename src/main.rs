@@ -1,13 +1,24 @@
+use environment::Environment;
+
 mod environment;
 mod file;
 mod ticket_number;
 mod process;
 mod patch_commit_msg;
 
-fn entry_point() -> Result<(), String> {
-    let env = environment::system_environment()?;
-    let commit_msg_file = env.commit_msg_file();
-    let commit_msg = file::read_file(commit_msg_file)?;
+const GIT_CONFIG_PREFIX_PARAM: &str = "ticket.number.prefix";
+
+fn usage(env: &Environment) -> Result<(), String> {
+    println!("Usage: {} COMMIT_MESSAGE_FILE", env.executable_name());
+    println!();
+    println!("To set prefix for the ticket number:");
+    println!("git config {} PREFIX_VALUE", GIT_CONFIG_PREFIX_PARAM);
+    Ok(())
+}
+
+fn adjust_commit_message(env: &Environment) -> Result<(), String> {
+    let commit_msg_file = env.commit_msg_file()?;
+    let commit_msg = file::read_file(&commit_msg_file)?;
     let branch = process::exec(
         "git",
         &vec!["rev-parse", "--abbrev-ref", "HEAD"])
@@ -15,7 +26,7 @@ fn entry_point() -> Result<(), String> {
     let ticket_number = ticket_number::ticket_number(&branch);
     let ticket_prefix = match process::exec(
         "git",
-        &vec!["config", "ticket.number.prefix"]) {
+        &vec!["config", GIT_CONFIG_PREFIX_PARAM]) {
         Ok(prefix) => Some(prefix),
         Err(_) => None
     };
@@ -23,8 +34,17 @@ fn entry_point() -> Result<(), String> {
         &commit_msg,
         &ticket_number,
         &ticket_prefix);
-    file::write_file(commit_msg_file, &updated_commit_msg)?;
+    file::write_file(&commit_msg_file, &updated_commit_msg)?;
     Ok(())
+}
+
+fn entry_point() -> Result<(), String> {
+    let env = environment::system_environment()?;
+    if env.show_usage() {
+        usage(&env)
+    } else {
+        adjust_commit_message(&env)
+    }
 }
 
 fn main() {
