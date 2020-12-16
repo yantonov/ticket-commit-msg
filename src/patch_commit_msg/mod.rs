@@ -1,5 +1,12 @@
+use regex::Regex;
+
 fn is_service_comment_line(line: &str) -> bool {
     line.starts_with("#")
+}
+
+fn prepare_prefix(prefix: String) -> String {
+    let re = Regex::new(r"^(.*[^\r\n])([\r\n]*)$").unwrap();
+    re.replace(&prefix, "$1").to_string()
 }
 
 pub fn patch_commit_msg(commit_msg: &Vec<String>,
@@ -28,9 +35,9 @@ pub fn patch_commit_msg(commit_msg: &Vec<String>,
             }
             if !found {
                 let new_line = format!("{}{}",
-                                       ticket_prefix
+                                       prepare_prefix(ticket_prefix
                                            .clone()
-                                           .unwrap_or("".to_string()),
+                                           .unwrap_or("".to_string())),
                                        ticket.clone());
                 match first_comment_line {
                     None => {
@@ -80,9 +87,9 @@ mod tests {
                 "1".to_string(),
                 "2".to_string()],
             &Some("ISSUE-123".to_string()),
-            &Some("ISSUE: ".to_string()));
+            &Some("PREFIX: ".to_string()));
         assert_eq!(3, result.len());
-        assert_eq!("ISSUE: ISSUE-123", result.get(2).unwrap());
+        assert_eq!("PREFIX: ISSUE-123", result.get(2).unwrap());
     }
 
     #[test]
@@ -106,5 +113,17 @@ mod tests {
         assert_eq!("1", result.get(0).unwrap());
         assert_eq!("ISSUE-123", result.get(1).unwrap());
         assert_eq!("# comment ISSUE-123", result.get(2).unwrap());
+    }
+
+    #[test]
+    fn prefix_contains_eoln_wait_eoln_is_removed() {
+        let result = patch_commit_msg(
+            &vec![
+                "1".to_string(),
+                "2".to_string()],
+            &Some("ISSUE-123".to_string()),
+            &Some("PREFIX: \r\n\r\n\r".to_string()));
+        assert_eq!(3, result.len());
+        assert_eq!("PREFIX: ISSUE-123", result.get(2).unwrap());
     }
 }

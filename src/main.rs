@@ -16,7 +16,7 @@ fn entry_point() -> Result<(), String> {
     let ticket_prefix = match process::exec(
         "git",
         &vec!["config", "ticket.number.prefix"]) {
-        Ok(prefix) => Some(prefix.trim().to_string()),
+        Ok(prefix) => Some(prefix),
         Err(_) => None
     };
     let updated_commit_msg = patch_commit_msg::patch_commit_msg(
