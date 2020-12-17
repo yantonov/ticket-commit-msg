@@ -85,7 +85,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn ticket_number_is_undefined_commit_message_remain_unchanged() {
+    fn ticket_number_is_undefined_expect_do_nothing() {
         let result = patch_commit_msg(
             &vector_of_string(
                 vec![
@@ -97,7 +97,7 @@ mod tests {
     }
 
     #[test]
-    fn commit_message_does_not_contain_ticket_number_add_ticket_number() {
+    fn commit_message_does_not_contain_ticket_number_expect_adding_ticket_number() {
         let result = patch_commit_msg(
             &vector_of_string(
                 vec![
@@ -110,7 +110,7 @@ mod tests {
     }
 
     #[test]
-    fn commit_message_does_not_contain_ticket_number_add_ticket_number_with_prefix() {
+    fn commit_message_does_not_contain_ticket_number_expect_adding_ticket_number_with_prefix() {
         let result = patch_commit_msg(
             &vector_of_string(
                 vec![
@@ -123,7 +123,7 @@ mod tests {
     }
 
     #[test]
-    fn ticket_number_is_found_inside_commit_message_commit_message_remain_unchanged() {
+    fn ticket_number_is_found_inside_commit_message_expect_do_nothing() {
         let result = patch_commit_msg(
             &vector_of_string(
                 vec![
@@ -135,7 +135,7 @@ mod tests {
     }
 
     #[test]
-    fn ticket_number_is_found_only_inside_commented_line_add_it_to_the_commit_message() {
+    fn ticket_number_is_found_only_inside_commented_line_expect_adding_ticket_number() {
         let result = patch_commit_msg(
             &vector_of_string(
                 vec![
@@ -150,7 +150,7 @@ mod tests {
     }
 
     #[test]
-    fn prefix_contains_eoln_wait_eoln_is_removed() {
+    fn prefix_contains_eoln_expect_eoln_is_removed() {
         let result = patch_commit_msg(
             &vector_of_string(
                 vec![
