@@ -3,16 +3,22 @@ set -eu
 
 cd "$(dirname "$0")/.."
 
-TARGET_EXECUTABLE="${HOME}/bin/ticket-commit-msg"
-if [ -L "${TARGET_EXECUTABLE}" ]; then
-    rm "${TARGET_EXECUTABLE}"
+TARGET="${HOME}/bin/ticket-commit-msg"
+if [ -L "${TARGET}" ]; then
+    echo 'Remove old symlink for the hook'
+    rm "${TARGET}"
 fi
 
-ln -s $(pwd)/target/release/ticket-commit-msg ${TARGET_EXECUTABLE}
+echo 'Create symlink for the hook'
+ln -s $(pwd)/target/release/ticket-commit-msg ${TARGET}
 
-TARGET_INSTALL_SCRIPT="${HOME}/bin/ticket-commit-msg-install"
-if [ -L "${TARGET_INSTALL_SCRIPT}" ]; then
-    rm "${TARGET_INSTALL_SCRIPT}"
+TARGET="${HOME}/bin/ticket-commit-msg-install"
+if [ -L "${TARGET}" ]; then
+    echo 'Remove old symlink for install script'
+    rm "${TARGET}"
 fi
 
-ln -s $(pwd)/install ${TARGET_INSTALL_SCRIPT}
+echo 'Create symlink for install script'
+ln -s $(pwd)/install ${TARGET}
+
+echo 'Done'
