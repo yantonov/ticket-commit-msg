@@ -1,5 +1,9 @@
 use regex::Regex;
 
+fn is_empty_line(line: &str) -> bool {
+    line.len() == 0
+}
+
 fn is_comment_line(line: &str) -> bool {
     line.starts_with("#")
 }
@@ -28,19 +32,25 @@ pub fn patch_commit_msg(commit_msg: &Vec<String>,
             let mut first_comment_line = None;
             let mut first_service_data_line = None;
             for (index, line) in lines.iter().enumerate() {
-                if is_comment_line(line) {
-                    if first_comment_line == None {
-                        first_comment_line = Some(index);
-                    }
-                } else {
-                    if is_service_data_line(line) {
-                        if first_service_data_line == None {
-                            first_service_data_line = Some(index);
+                if is_empty_line(line) {
+                    first_comment_line = None;
+                    first_service_data_line = None;
+                }
+                else {
+                    if is_comment_line(line) {
+                        if first_comment_line == None {
+                            first_comment_line = Some(index);
                         }
-                    }
-                    if line.contains(ticket) {
-                        found = true;
-                        break;
+                    } else {
+                        if is_service_data_line(line) {
+                            if first_service_data_line == None {
+                                first_service_data_line = Some(index);
+                            }
+                        }
+                        if line.contains(ticket) {
+                            found = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -157,5 +167,24 @@ mod tests {
         assert_eq!("1", result.get(0).unwrap());
         assert_eq!("ISSUE-123", result.get(1).unwrap());
         assert_eq!("Change-Id: 111222", result.get(2).unwrap());
+    }
+
+    #[test]
+    fn prefer_inserting_to_the_end_of_the_file() {
+        let result = patch_commit_msg(
+            &vec![
+                "1".to_string(),
+                "Change-Id: 111222".to_string(),
+                "# tmp line".to_string(),
+                "".to_string(),
+                "Change-Id: 333444".to_string(),
+                "# large".to_string(),
+                "# commented".to_string(),
+                "# block".to_string()],
+            &Some("ISSUE-123".to_string()),
+            &None);
+        assert_eq!(9, result.len());
+        assert_eq!("ISSUE-123", result.get(4).unwrap());
+        assert_eq!("Change-Id: 333444", result.get(5).unwrap());
     }
 }
