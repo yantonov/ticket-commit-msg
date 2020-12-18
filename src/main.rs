@@ -6,7 +6,7 @@ mod ticket_number;
 mod process;
 mod patch_commit_msg;
 
-const GIT_CONFIG_PREFIX_PARAM: &str = "ticket.number.prefix";
+const GIT_CONFIG_PREFIX_PARAM: &str = "custom.ticketnumberprefix";
 
 fn usage(env: &Environment) -> Result<(), String> {
     println!("Usage: {} COMMIT_MESSAGE_FILE", env.executable_name());
