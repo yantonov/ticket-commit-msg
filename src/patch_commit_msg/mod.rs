@@ -18,6 +18,39 @@ fn prepare_prefix(prefix: String) -> String {
     re.replace(&prefix, "$1").to_string()
 }
 
+fn try_find_ticket_number(lines: &Vec<String>, ticket_number: &String) -> bool {
+    let mut found = false;
+    for line in lines.iter() {
+        if !is_comment_line(line) && line.contains(ticket_number) {
+            found = true;
+            break;
+        }
+    }
+    found
+}
+
+fn try_find_insert_position(lines: &Vec<String>) -> Option<usize> {
+    let lines_count = lines.len();
+    let mut index = (lines_count - 1) as i32;
+    while index >= 0 {
+        let line = lines.get(index as usize).unwrap();
+        if is_comment_line(line) || is_empty_line(line) {
+            index -= 1;
+        } else {
+            if is_service_data_line(line) {
+                return Some(index as usize);
+            } else {
+                let next_index = (index + 1) as usize;
+                if next_index < lines_count {
+                    return Some(next_index);
+                }
+                break;
+            }
+        }
+    }
+    None
+}
+
 pub fn patch_commit_msg(commit_msg: &Vec<String>,
                         ticket_number: &Option<String>,
                         ticket_prefix: &Option<String>) -> Vec<String> {
@@ -28,50 +61,20 @@ pub fn patch_commit_msg(commit_msg: &Vec<String>,
     match ticket_number {
         None => {}
         Some(ticket) => {
-            let mut found = false;
-            let mut first_comment_line = None;
-            let mut first_service_data_line = None;
-            for (index, line) in lines.iter().enumerate() {
-                if is_empty_line(line) {
-                    first_comment_line = None;
-                    first_service_data_line = None;
-                } else {
-                    if is_comment_line(line) {
-                        if first_comment_line == None {
-                            first_comment_line = Some(index);
-                        }
-                    } else {
-                        if is_service_data_line(line) {
-                            if first_service_data_line == None {
-                                first_service_data_line = Some(index);
-                            }
-                        }
-                        if line.contains(ticket) {
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            if !found {
+            let ticket_number_found = try_find_ticket_number(&lines, ticket);
+            if !ticket_number_found {
+                let position = try_find_insert_position(&lines);
                 let new_line = format!("{}{}",
                                        prepare_prefix(ticket_prefix
                                            .clone()
                                            .unwrap_or("".to_string())),
                                        ticket.clone());
-                match first_service_data_line {
+                match position {
                     Some(index) => {
                         lines.insert(index, new_line);
                     }
                     None => {
-                        match first_comment_line {
-                            Some(index) => {
-                                lines.insert(index, new_line);
-                            }
-                            None => {
-                                lines.push(new_line);
-                            }
-                        }
+                        lines.push(new_line);
                     }
                 }
             }
@@ -140,10 +143,11 @@ mod tests {
             &vector_of_string(
                 vec![
                     "1",
-                    "# comment ISSUE-123"]),
+                    "# comment ISSUE-123",
+                    "# another comment line"]),
             &Some("ISSUE-123".to_string()),
             &None);
-        assert_eq!(3, result.len());
+        assert_eq!(4, result.len());
         assert_eq!("1", result.get(0).unwrap());
         assert_eq!("ISSUE-123", result.get(1).unwrap());
         assert_eq!("# comment ISSUE-123", result.get(2).unwrap());
@@ -193,6 +197,28 @@ mod tests {
             &Some("ISSUE-123".to_string()),
             &None);
         assert_eq!(9, result.len());
+        assert_eq!("ISSUE-123", result.get(4).unwrap());
+        assert_eq!("Change-Id: 333444", result.get(5).unwrap());
+    }
+
+    #[test]
+    fn ignore_trailing_empty_lines_after_service_lines() {
+        let result = patch_commit_msg(
+            &vector_of_string(
+                vec![
+                    "1",
+                    "Change-Id: 111222",
+                    "# tmp line",
+                    "",
+                    "Change-Id: 333444",
+                    "",
+                    "",
+                    "# large",
+                    "# commented",
+                    "# block"]),
+            &Some("ISSUE-123".to_string()),
+            &None);
+        assert_eq!(11, result.len());
         assert_eq!("ISSUE-123", result.get(4).unwrap());
         assert_eq!("Change-Id: 333444", result.get(5).unwrap());
     }
