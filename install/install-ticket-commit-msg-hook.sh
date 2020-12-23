@@ -32,6 +32,7 @@ else
         echo "Warn - commit hook is already exist, if you want to modify, do it manually"
         echo "If you want to force general commit hook use --force flag"
         echo "${SCRIPT} --force"
+        echo "Be careful with this action. Think twice! Manual editing may be needed for the hook configuration."
         exit 1
     fi
 fi
