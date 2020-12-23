@@ -103,7 +103,12 @@ mod tests {
                     "2"]),
             &None,
             &None);
-        assert_eq!(2, result.len());
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "2"
+            ]);
+        assert_eq!(&expected, &result);
     }
 
     #[test]
@@ -115,8 +120,14 @@ mod tests {
                     "2"]),
             &Some("ISSUE-123".to_string()),
             &None);
-        assert_eq!(3, result.len());
-        assert_eq!("ISSUE-123", result.get(2).unwrap());
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "2",
+                "ISSUE-123"
+            ]
+        );
+        assert_eq!(&expected, &result);
     }
 
     #[test]
@@ -128,8 +139,14 @@ mod tests {
                     "2"]),
             &Some("ISSUE-123".to_string()),
             &Some("PREFIX: ".to_string()));
-        assert_eq!(3, result.len());
-        assert_eq!("PREFIX: ISSUE-123", result.get(2).unwrap());
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "2",
+                "PREFIX: ISSUE-123"
+            ]
+        );
+        assert_eq!(&expected, &result);
     }
 
     #[test]
@@ -141,7 +158,13 @@ mod tests {
                     "blablabla ISSUE-123 blablabla"]),
             &Some("ISSUE-123".to_string()),
             &None);
-        assert_eq!(2, result.len());
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "blablabla ISSUE-123 blablabla"
+            ]
+        );
+        assert_eq!(&expected, &result);
     }
 
     #[test]
@@ -154,10 +177,15 @@ mod tests {
                     "# another comment line"]),
             &Some("ISSUE-123".to_string()),
             &None);
-        assert_eq!(4, result.len());
-        assert_eq!("1", result.get(0).unwrap());
-        assert_eq!("ISSUE-123", result.get(1).unwrap());
-        assert_eq!("# comment ISSUE-123", result.get(2).unwrap());
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "ISSUE-123",
+                "# comment ISSUE-123",
+                "# another comment line"
+            ]
+        );
+        assert_eq!(&expected, &result);
     }
 
     #[test]
@@ -169,8 +197,14 @@ mod tests {
                     "2"]),
             &Some("ISSUE-123".to_string()),
             &Some("PREFIX: \r\n\r\n\r".to_string()));
-        assert_eq!(3, result.len());
-        assert_eq!("PREFIX: ISSUE-123", result.get(2).unwrap());
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "2",
+                "PREFIX: ISSUE-123"
+            ]
+        );
+        assert_eq!(&expected, &result);
     }
 
     #[test]
@@ -183,11 +217,15 @@ mod tests {
                     "Another-Service_Info: 333444"]),
             &Some("ISSUE-123".to_string()),
             &None);
-        assert_eq!(4, result.len());
-        assert_eq!("1", result.get(0).unwrap());
-        assert_eq!("ISSUE-123", result.get(1).unwrap());
-        assert_eq!("Change-Id: 111222", result.get(2).unwrap());
-        assert_eq!("Another-Service_Info: 333444", result.get(3).unwrap());
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "ISSUE-123",
+                "Change-Id: 111222",
+                "Another-Service_Info: 333444"
+            ]
+        );
+        assert_eq!(&expected, &result);
     }
 
     #[test]
@@ -205,9 +243,20 @@ mod tests {
                     "# block"]),
             &Some("ISSUE-123".to_string()),
             &None);
-        assert_eq!(9, result.len());
-        assert_eq!("ISSUE-123", result.get(4).unwrap());
-        assert_eq!("Change-Id: 333444", result.get(5).unwrap());
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "Change-Id: 111222",
+                "# tmp line",
+                "",
+                "ISSUE-123",
+                "Change-Id: 333444",
+                "# large",
+                "# commented",
+                "# block"
+            ]
+        );
+        assert_eq!(&expected, &result);
     }
 
     #[test]
@@ -227,9 +276,23 @@ mod tests {
                     "# block"]),
             &Some("ISSUE-123".to_string()),
             &None);
-        assert_eq!(11, result.len());
-        assert_eq!("ISSUE-123", result.get(4).unwrap());
-        assert_eq!("Change-Id: 333444", result.get(5).unwrap());
+
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "Change-Id: 111222",
+                "# tmp line",
+                "",
+                "ISSUE-123",
+                "Change-Id: 333444",
+                "",
+                "",
+                "# large",
+                "# commented",
+                "# block"
+            ]
+        );
+        assert_eq!(&expected, &result);
     }
 
     fn vector_of_string(v: Vec<&str>) -> Vec<String> {
