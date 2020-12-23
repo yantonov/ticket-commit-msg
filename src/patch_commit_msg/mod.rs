@@ -32,21 +32,28 @@ fn try_find_ticket_number(lines: &Vec<String>, ticket_number: &String) -> bool {
 fn try_find_insert_position(lines: &Vec<String>) -> Option<usize> {
     let lines_count = lines.len();
     let mut index = (lines_count - 1) as i32;
+    let mut service_info_line = None;
     while index >= 0 {
         let line = lines.get(index as usize).unwrap();
         if is_comment_line(line) || is_empty_line(line) {
-            index -= 1;
+            if service_info_line != None {
+                return service_info_line;
+            }
         } else {
             if is_service_data_line(line) {
-                return Some(index as usize);
+                service_info_line = Some(index as usize);
             } else {
+                if service_info_line != None {
+                    return service_info_line;
+                }
                 let next_index = (index + 1) as usize;
                 if next_index < lines_count {
                     return Some(next_index);
                 }
-                break;
+                return None;
             }
         }
+        index -= 1;
     }
     None
 }
@@ -172,13 +179,15 @@ mod tests {
             &vector_of_string(
                 vec![
                     "1",
-                    "Change-Id: 111222"]),
+                    "Change-Id: 111222",
+                    "Another-Service_Info: 333444"]),
             &Some("ISSUE-123".to_string()),
             &None);
-        assert_eq!(3, result.len());
+        assert_eq!(4, result.len());
         assert_eq!("1", result.get(0).unwrap());
         assert_eq!("ISSUE-123", result.get(1).unwrap());
         assert_eq!("Change-Id: 111222", result.get(2).unwrap());
+        assert_eq!("Another-Service_Info: 333444", result.get(3).unwrap());
     }
 
     #[test]
