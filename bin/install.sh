@@ -3,6 +3,8 @@ set -eu
 
 cd "$(dirname "$0")/.."
 
+cargo build --release
+
 TARGET="${HOME}/bin/ticket-commit-msg"
 if [ -L "${TARGET}" ]; then
     echo 'Remove old symlink for the hook'
