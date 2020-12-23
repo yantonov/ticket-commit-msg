@@ -57,10 +57,7 @@ fn try_find_insert_position(lines: &Vec<String>) -> Option<usize> {
 pub fn patch_commit_msg(commit_msg: &Vec<String>,
                         ticket_number: &Option<String>,
                         ticket_prefix: &Option<String>) -> Vec<String> {
-    let mut lines: Vec<String> = commit_msg
-        .into_iter()
-        .map(|x| x.clone())
-        .collect();
+    let mut lines: Vec<String> = commit_msg.clone();
     match ticket_number {
         None => {}
         Some(ticket) => {
