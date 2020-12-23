@@ -19,14 +19,10 @@ fn prepare_prefix(prefix: String) -> String {
 }
 
 fn try_find_ticket_number(lines: &Vec<String>, ticket_number: &String) -> bool {
-    let mut found = false;
-    for line in lines.iter() {
-        if !is_comment_line(line) && line.contains(ticket_number) {
-            found = true;
-            break;
-        }
-    }
-    found
+    lines.iter()
+        .find(|line|
+            !is_comment_line(line)
+                && line.contains(ticket_number)).is_some()
 }
 
 fn try_find_insert_position(lines: &Vec<String>) -> Option<usize> {
