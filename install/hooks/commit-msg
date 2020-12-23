@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -eu
 
+# general hook extension point
+
 ORIG_WD="$(pwd)"
 
 SCRIPT="$(basename "$0")"
