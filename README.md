@@ -13,7 +13,7 @@ For the ticket number app uses typical name convention (sample QUEUE-123).
 
 ### Usage:
 1. add application to the PATH
-2. install commit-msg hook, using script [install/install-ticket-commit-msg.sh](https://github.com/yantonov/ticket-commit-msg/blob/master/install/install-ticket-commit-msg.sh)
+2. install commit-msg hook, using script [install/install-ticket-commit-msg-hook.sh](https://github.com/yantonov/ticket-commit-msg/blob/master/install/install-ticket-commit-msg-hook.sh)
 3. commit something
 
 To simplify usage for several repositories you can add install directory to the PATH.
