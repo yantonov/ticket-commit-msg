@@ -18,7 +18,7 @@ if [ ! -f "${GIT_ROOT}/.git/hooks/commit-msg" ]; then
         echo "Ok - commit hook is successfully installed"
     fi
 else
-    if [ "$1" == "--force" ]; then
+    if [ "$1" = "--force" ]; then
         if [ -z "$(cat ${GIT_ROOT}/.git/hooks/commit-msg | grep 'general hook extension point' || echo '')" ]; then
             mkdir -p "${GIT_ROOT}/.git/hooks/commit-msg-hooks"
             mv "${GIT_ROOT}/.git/hooks/commit-msg" "${GIT_ROOT}/.git/hooks/commit-msg-hooks/0-commit-msg"
