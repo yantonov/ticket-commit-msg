@@ -3,7 +3,7 @@ use std::path::Path;
 
 pub fn read_file(path: &Path) -> Result<Vec<String>, String> {
     let file_content = fs::read_to_string(path)
-        .map_err(|_| "Cannot read commit message file".to_string())?;
+        .map_err(|_| format!("Cannot read file: {}", path.to_str().unwrap()))?;
     let lines: Vec<String> = file_content.lines()
         .into_iter()
         .map(|x| x.to_string())
@@ -14,6 +14,6 @@ pub fn read_file(path: &Path) -> Result<Vec<String>, String> {
 pub fn write_file(path: &Path, lines: &Vec<String>) -> Result<(), String> {
     let eoln = "\n";
     fs::write(path, lines.join(eoln))
-        .map_err(|_| "cannot write commit message".to_string())?;
+        .map_err(|_| format!("cannot write lines to the file: {}", path.to_str().unwrap()))?;
     Ok(())
 }
