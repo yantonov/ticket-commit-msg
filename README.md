@@ -8,7 +8,8 @@ This tool helps you to get rid of manual mechanics around it.
 Idea: hook extracts ticket number from the branch name.
 
 ### Mechanics
-It is supposed that the branch name starts with the ticket number and uses the typical name convention: QUEUE-123.  
+It is supposed that the branch name starts with the ticket number and uses the typical name convention  
+(example:: QUEUE-123).  
 If ticket number can be extracted from branch name and it is not mentioned inside the commit message it will be included automatically on a separate line.  
 Otherwise commit message will remain unchanged.  
 
