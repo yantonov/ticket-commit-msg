@@ -3,7 +3,7 @@
 Git commit hook that helps to add ticket/issue number to the commit message.
 
 ### Motivation
-When you use [youtrack](https://www.jetbrains.com/youtrack/), [tracker](https://yandex.com/tracker/), [jira](https://www.atlassian.com/software/jira), etc it is useful to add ticket number to the commit message.  
+When you use [youtrack](https://www.jetbrains.com/youtrack/), [tracker](https://yandex.com/tracker/), [jira](https://www.atlassian.com/software/jira), etc it is convenient to automatically add ticket number to the commit message.  
 This tool helps you to get rid of manual mechanics around it.  
 Idea: hook extracts ticket number from the branch name.
 
