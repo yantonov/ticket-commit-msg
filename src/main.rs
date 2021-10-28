@@ -21,13 +21,13 @@ fn adjust_commit_message(env: &Environment) -> Result<(), String> {
     let commit_msg = file::read_file(&commit_msg_file)?;
     let branch = process::exec(
         "git",
-        &vec!["rev-parse", "--abbrev-ref", "HEAD"])
-        .map_err(|err| format!("cannot detect current branch: [details: {}]", err).to_string())?;
+        &["rev-parse", "--abbrev-ref", "HEAD"])
+        .map_err(|err| format!("cannot detect current branch: [details: {}]", err))?;
     let ticket_number = ticket_number::ticket_number(&branch);
-    if let Some(_) = ticket_number {
+    if ticket_number.is_some() {
         let ticket_prefix = match process::exec(
             "git",
-            &vec!["config", GIT_CONFIG_PREFIX_PARAM]) {
+            &["config", GIT_CONFIG_PREFIX_PARAM]) {
             Ok(prefix) => Some(prefix),
             Err(_) => None
         };

@@ -4,12 +4,7 @@ pub fn ticket_number(branch: &str) -> Option<String> {
     let re = Regex::new(r"^(.*/|)([A-Z0-9]+-[0-9]+)[^/]*$")
         .unwrap();
     let captures = re.captures(branch);
-    match captures {
-        None => None,
-        Some(value) => {
-            Some(value.get(2).unwrap().as_str().to_string())
-        }
-    }
+    captures.map(|value| value.get(2).unwrap().as_str().to_string())
 }
 
 #[cfg(test)]

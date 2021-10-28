@@ -37,7 +37,6 @@ pub fn system_environment() -> Result<Environment, String> {
         executable: args.get(0)
             .expect("executable is not defined")
             .to_string(),
-        commit_msg_tmp_file: args.get(1)
-            .map(|x| x.clone()),
+        commit_msg_tmp_file: args.get(1).cloned(),
     })
 }

@@ -1,11 +1,11 @@
 use regex::Regex;
 
 fn is_empty_line(line: &str) -> bool {
-    line.len() == 0
+    line.is_empty()
 }
 
 fn is_comment_line(line: &str) -> bool {
-    line.starts_with("#")
+    line.starts_with('#')
 }
 
 fn is_service_data_line(line: &str) -> bool {
@@ -18,14 +18,14 @@ fn prepare_prefix(prefix: String) -> String {
     re.replace(&prefix, "$1").to_string()
 }
 
-fn try_find_ticket_number(lines: &Vec<String>, ticket_number: &String) -> bool {
+fn try_find_ticket_number(lines: &[String], ticket_number: &str) -> bool {
     lines.iter()
-        .find(|line|
+        .any(|line|
             !is_comment_line(line)
-                && line.contains(ticket_number)).is_some()
+                && line.contains(ticket_number))
 }
 
-fn try_find_insert_position(lines: &Vec<String>) -> Option<usize> {
+fn try_find_insert_position(lines: &[String]) -> Option<usize> {
     let lines_count = lines.len();
     let mut index = (lines_count - 1) as i32;
     let mut service_info_line = None;
@@ -35,29 +35,27 @@ fn try_find_insert_position(lines: &Vec<String>) -> Option<usize> {
             if service_info_line != None {
                 return service_info_line;
             }
+        } else if is_service_data_line(line) {
+            service_info_line = Some(index as usize);
         } else {
-            if is_service_data_line(line) {
-                service_info_line = Some(index as usize);
-            } else {
-                if service_info_line != None {
-                    return service_info_line;
-                }
-                let next_index = (index + 1) as usize;
-                if next_index < lines_count {
-                    return Some(next_index);
-                }
-                return None;
+            if service_info_line != None {
+                return service_info_line;
             }
+            let next_index = (index + 1) as usize;
+            if next_index < lines_count {
+                return Some(next_index);
+            }
+            return None;
         }
         index -= 1;
     }
     None
 }
 
-pub fn patch_commit_msg(commit_msg: &Vec<String>,
+pub fn patch_commit_msg(commit_msg: &[String],
                         ticket_number: &Option<String>,
                         ticket_prefix: &Option<String>) -> Vec<String> {
-    let mut lines: Vec<String> = commit_msg.clone();
+    let mut lines: Vec<String> = commit_msg.to_vec();
     match ticket_number {
         None => {}
         Some(ticket) => {
@@ -67,7 +65,7 @@ pub fn patch_commit_msg(commit_msg: &Vec<String>,
                 let new_line = format!("{}{}",
                                        prepare_prefix(ticket_prefix
                                            .clone()
-                                           .unwrap_or("".to_string())),
+                                           .unwrap_or_else(|| "".to_string())),
                                        ticket.clone());
                 match position {
                     Some(index) => {
