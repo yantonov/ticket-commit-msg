@@ -6,15 +6,13 @@ cd "$(dirname "$0")/.."
 cargo build --release
 
 TARGET="${HOME}/bin/ticket-commit-msg"
-if [ -L "${TARGET}" ]; then
-    echo "Remove old symlink ${TARGET} for the hook"
+if [ -f "${TARGET}" ] || [ -L "${TARGET}" ]; then
+    echo "Remove old file ${TARGET} for the hook"
     rm "${TARGET}"
 fi
 
 echo "Create symlink ${TARGET} for the hook"
-ln -s $(pwd)/target/release/ticket-commit-msg ${TARGET}
-
-echo ''
+cp $(pwd)/target/release/ticket-commit-msg ${TARGET}
 
 TARGET="${HOME}/bin/ticket-commit-msg-install"
 if [ -L "${TARGET}" ]; then
@@ -25,5 +23,4 @@ fi
 echo "Create symlink ${TARGET} for install script"
 ln -s $(pwd)/install ${TARGET}
 
-echo ''
 echo 'Done'
