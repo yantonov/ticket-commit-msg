@@ -28,5 +28,65 @@ git config custom.ticketnumberprefix 'Issue: '
 Then after you commit something while an active branch is QUEUE-123:  
 the following line will be added to the commit message: "Issue: QUEUE-123".
 
+### Example
+```
+test on master
+❯ git br
+* master 8692399 initial commit
+
+test on master
+❯ git branch
+* master
+
+test on master
+❯ git checkout -b QUEUE-123
+Switched to a new branch 'QUEUE-123'
+
+test on QUEUE-123
+❯ touch test.txt
+
+test on QUEUE-123 [?]
+❯ git add .
+
+test on QUEUE-123 [+]
+❯ git commit -m 'Test'
+[QUEUE-123 352c7c4] Test QUEUE-123
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 test.txt
+
+test on QUEUE-123
+❯ git log -n 1
+commit 352c7c4d9a0db7a7fa91a1a8d9ea937143192116 (HEAD -> QUEUE-123)
+Author: Yury Antonov <1390348+yantonov@users.noreply.github.com>
+Date:   Thu May 26 15:17:36 2022 +0200
+
+    Test
+    QUEUE-123
+
+test on QUEUE-123
+❯ git config custom.ticketnumberprefix 'JIRA: '
+
+test on QUEUE-123
+❯ touch test2.txt
+
+test on QUEUE-123 [?]
+❯ git add .
+
+test on QUEUE-123 [+]
+❯ git commit -m 'Test 2'
+[QUEUE-123 d0c99a4] Test 2 JIRA: QUEUE-123
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 test2.txt
+
+test on QUEUE-123
+❯ git log -n 1
+commit d0c99a4fa7d46ea65166e460d52bbeda077a8978 (HEAD -> QUEUE-123)
+Author: Yury Antonov <1390348+yantonov@users.noreply.github.com>
+Date:   Thu May 26 15:18:35 2022 +0200
+
+    Test 2
+    JIRA: QUEUE-123
+```
+
 #### Links
 1. [Git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)
