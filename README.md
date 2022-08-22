@@ -14,7 +14,7 @@ If ticket number can be extracted from branch name and it is not mentioned insid
 Otherwise commit message will remain unchanged.  
 
 ### Usage:
-1. add application to the PATH
+1. add application to the PATH. Binaries for each platform is available [here](https://github.com/yantonov/ticket-commit-msg/releases), you don't need to install Rust toolchain.  
 2. install commit-msg hook, using script [install/install-ticket-commit-msg-hook.sh](https://github.com/yantonov/ticket-commit-msg/blob/master/install/install-ticket-commit-msg-hook.sh)
 3. commit something
 
