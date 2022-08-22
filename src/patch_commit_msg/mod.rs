@@ -1,4 +1,4 @@
-use regex::Regex;
+use regex::{Regex};
 
 fn is_empty_line(line: &str) -> bool {
     line.is_empty()
@@ -22,34 +22,37 @@ fn try_find_ticket_number(lines: &[String], ticket_number: &str) -> bool {
     lines.iter()
         .any(|line|
             !is_comment_line(line)
-                && line.contains(ticket_number))
+                && line.eq(ticket_number))
 }
 
 fn try_find_insert_position(lines: &[String]) -> Option<usize> {
     let lines_count = lines.len();
     let mut index = (lines_count - 1) as i32;
     let mut service_info_line = None;
+    let mut non_empty_line_found = false;
     while index >= 0 {
         let line = lines.get(index as usize).unwrap();
-        if is_comment_line(line) || is_empty_line(line) {
-            if service_info_line != None {
-                return service_info_line;
-            }
-        } else if is_service_data_line(line) {
-            service_info_line = Some(index as usize);
-        } else {
-            if service_info_line != None {
-                return service_info_line;
-            }
-            let next_index = (index + 1) as usize;
-            if next_index < lines_count {
-                return Some(next_index);
-            }
-            return None;
+        if is_comment_line(line) {
+            index -= 1;
+            continue;
         }
-        index -= 1;
+        if is_empty_line(line) {
+            if non_empty_line_found {
+                break;
+            } else {
+                index -= 1;
+                continue;
+            }
+        }
+        if is_service_data_line(line) {
+            non_empty_line_found = true;
+            service_info_line = Some(index as usize);
+            index -= 1;
+            continue;
+        }
+        break;
     }
-    None
+    service_info_line
 }
 
 pub fn patch_commit_msg(commit_msg: &[String],
@@ -59,14 +62,14 @@ pub fn patch_commit_msg(commit_msg: &[String],
     match ticket_number {
         None => {}
         Some(ticket) => {
-            let ticket_number_found = try_find_ticket_number(&lines, ticket);
+            let new_line = format!("{}{}",
+                                   prepare_prefix(ticket_prefix
+                                       .clone()
+                                       .unwrap_or_else(|| "".to_string())),
+                                   ticket.clone());
+            let ticket_number_found = try_find_ticket_number(&lines, &new_line);
             if !ticket_number_found {
                 let position = try_find_insert_position(&lines);
-                let new_line = format!("{}{}",
-                                       prepare_prefix(ticket_prefix
-                                           .clone()
-                                           .unwrap_or_else(|| "".to_string())),
-                                       ticket.clone());
                 match position {
                     Some(index) => {
                         lines.insert(index, new_line);
@@ -98,13 +101,13 @@ mod tests {
         let expected = vector_of_string(
             vec![
                 "1",
-                "2"
+                "2",
             ]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
-    fn commit_message_does_not_contain_ticket_number_expect_adding_ticket_number() {
+    fn ticket_number_is_absent_prefix_is_empty_expect_change() {
         let result = patch_commit_msg(
             &vector_of_string(
                 vec![
@@ -117,14 +120,14 @@ mod tests {
                 "1",
                 "2",
                 "",
-                "ISSUE-123"
+                "ISSUE-123",
             ]
         );
         assert_eq!(&expected, &result);
     }
 
     #[test]
-    fn commit_message_does_not_contain_ticket_number_expect_adding_ticket_number_with_prefix() {
+    fn ticket_number_is_absent_prefix_is_non_empty_expect_change() {
         let result = patch_commit_msg(
             &vector_of_string(
                 vec![
@@ -137,14 +140,14 @@ mod tests {
                 "1",
                 "2",
                 "",
-                "PREFIX: ISSUE-123"
+                "PREFIX: ISSUE-123",
             ]
         );
         assert_eq!(&expected, &result);
     }
 
     #[test]
-    fn ticket_number_is_found_inside_commit_message_expect_do_nothing() {
+    fn ticket_number_is_found_inside_the_text_expect_change() {
         let result = patch_commit_msg(
             &vector_of_string(
                 vec![
@@ -155,14 +158,99 @@ mod tests {
         let expected = vector_of_string(
             vec![
                 "1",
-                "blablabla ISSUE-123 blablabla"
+                "blablabla ISSUE-123 blablabla",
+                "",
+                "ISSUE-123"
             ]
         );
         assert_eq!(&expected, &result);
     }
 
     #[test]
-    fn ticket_number_is_found_only_inside_commented_line_expect_adding_ticket_number() {
+    fn ticket_number_is_found_with_prefix_but_with_different_suffix_expect_change() {
+        let result = patch_commit_msg(
+            &vector_of_string(
+                vec![
+                    "1",
+                    "Ticket ISSUE-123 unknown suffix"]),
+            &Some("ISSUE-123".to_string()),
+            &Some("Ticket ".to_string()));
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "Ticket ISSUE-123 unknown suffix",
+                "",
+                "Ticket ISSUE-123",
+            ]
+        );
+        assert_eq!(&expected, &result);
+    }
+
+    #[test]
+    fn ticket_number_is_found_as_service_line_with_prefix_but_with_different_suffix_expect_change() {
+        let result = patch_commit_msg(
+            &vector_of_string(
+                vec![
+                    "1",
+                    "Ticket: ISSUE-123 unknown suffix"]),
+            &Some("ISSUE-123".to_string()),
+            &Some("Ticket: ".to_string()));
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "Ticket: ISSUE-123",
+                "Ticket: ISSUE-123 unknown suffix"
+            ]
+        );
+        assert_eq!(&expected, &result);
+    }
+
+    #[test]
+    fn ticket_number_is_found_but_with_different_prefix_and_without_suffix_expect_change() {
+        let result = patch_commit_msg(
+            &vector_of_string(
+                vec![
+                    "1",
+                    "",
+                    "another prefix ISSUE-123"]),
+            &Some("ISSUE-123".to_string()),
+            &Some("Ticket: ".to_string()));
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "",
+                "another prefix ISSUE-123",
+                "",
+                "Ticket: ISSUE-123",
+            ]
+        );
+        assert_eq!(&expected, &result);
+    }
+
+    #[test]
+    fn ticket_number_is_found_without_prefix_expect_change() {
+        let result = patch_commit_msg(
+            &vector_of_string(
+                vec![
+                    "1",
+                    "",
+                    "ISSUE-123"]),
+            &Some("ISSUE-123".to_string()),
+            &Some("Ticket: ".to_string()));
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "",
+                "ISSUE-123",
+                "",
+                "Ticket: ISSUE-123",
+            ]
+        );
+        assert_eq!(&expected, &result);
+    }
+
+    #[test]
+    fn ticket_number_is_found_only_inside_commented_line_expect_change() {
         let result = patch_commit_msg(
             &vector_of_string(
                 vec![
@@ -174,9 +262,10 @@ mod tests {
         let expected = vector_of_string(
             vec![
                 "1",
-                "ISSUE-123",
                 "# comment ISSUE-123",
-                "# another comment line"
+                "# another comment line",
+                "",
+                "ISSUE-123",
             ]
         );
         assert_eq!(&expected, &result);
@@ -196,7 +285,7 @@ mod tests {
                 "1",
                 "2",
                 "",
-                "PREFIX: ISSUE-123"
+                "PREFIX: ISSUE-123",
             ]
         );
         assert_eq!(&expected, &result);
@@ -217,7 +306,7 @@ mod tests {
                 "1",
                 "ISSUE-123",
                 "Change-Id: 111222",
-                "Another-Service_Info: 333444"
+                "Another-Service_Info: 333444",
             ]
         );
         assert_eq!(&expected, &result);
@@ -248,7 +337,7 @@ mod tests {
                 "Change-Id: 333444",
                 "# large",
                 "# commented",
-                "# block"
+                "# block",
             ]
         );
         assert_eq!(&expected, &result);
@@ -284,7 +373,7 @@ mod tests {
                 "",
                 "# large",
                 "# commented",
-                "# block"
+                "# block",
             ]
         );
         assert_eq!(&expected, &result);
