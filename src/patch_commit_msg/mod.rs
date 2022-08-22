@@ -72,6 +72,7 @@ pub fn patch_commit_msg(commit_msg: &[String],
                         lines.insert(index, new_line);
                     }
                     None => {
+                        lines.push("".to_string());
                         lines.push(new_line);
                     }
                 }
@@ -115,6 +116,7 @@ mod tests {
             vec![
                 "1",
                 "2",
+                "",
                 "ISSUE-123"
             ]
         );
@@ -134,6 +136,7 @@ mod tests {
             vec![
                 "1",
                 "2",
+                "",
                 "PREFIX: ISSUE-123"
             ]
         );
@@ -192,6 +195,7 @@ mod tests {
             vec![
                 "1",
                 "2",
+                "",
                 "PREFIX: ISSUE-123"
             ]
         );
