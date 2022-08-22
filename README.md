@@ -16,8 +16,9 @@ Otherwise commit message will remain unchanged.
 ### Usage:
 1. add application to the PATH.  
 Binaries for each platform are available [here](https://github.com/yantonov/ticket-commit-msg/releases), you don't need to install Rust toolchain.  
-2. install commit-msg hook, using script [install/install-ticket-commit-msg-hook.sh](https://github.com/yantonov/ticket-commit-msg/blob/master/install/install-ticket-commit-msg-hook.sh)
-3. commit something
+2. install commit-msg hook, using script [install/install-ticket-commit-msg-hook.sh](https://github.com/yantonov/ticket-commit-msg/blob/master/install/install-ticket-commit-msg-hook.sh)  
+To simplify usage you can add install script also to the PATH.  
+3. commit something  
 
 To simplify usage for several repositories you can add install directory to the PATH.
 
