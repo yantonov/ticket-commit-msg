@@ -9,6 +9,9 @@ mod patch_commit_msg;
 const GIT_CONFIG_PREFIX_PARAM: &str = "custom.ticketnumberprefix";
 
 fn usage(env: &Environment) -> Result<(), String> {
+    println!("ticket-commit-msg");
+    println!("version: {}", env!("CARGO_PKG_VERSION"));
+    println!();
     println!("Usage: {} COMMIT_MESSAGE_FILE", env.executable_name());
     println!();
     println!("To set prefix for the ticket number:");

@@ -1,6 +1,6 @@
 [package]
 name = "ticket-commit-msg"
-version = "0.1.0"
+version = "0.1.3"
 authors = ["Yury Antonov <1390348+yantonov@users.noreply.github.com>"]
 edition = "2018"
 
