@@ -99,6 +99,9 @@ pub fn patch_commit_msg(commit_msg: &[String],
                 DoNothing => {}
                 Insert(index) => {
                     lines.insert(index, new_line);
+                    if index > 0 && lines.get(index - 1).unwrap() != "" {
+                        lines.insert(index, "".to_string());
+                    }
                 }
                 Append => {
                     lines.push("".to_string());
@@ -223,6 +226,7 @@ mod tests {
         let expected = vector_of_string(
             vec![
                 "1",
+                "",
                 "Ticket: ISSUE-123",
                 "Ticket: ISSUE-123 unknown suffix",
             ]
@@ -329,6 +333,7 @@ mod tests {
         let expected = vector_of_string(
             vec![
                 "1",
+                "",
                 "ISSUE-123",
                 "Change-Id: 111222",
                 "Another-Service_Info: 333444",
