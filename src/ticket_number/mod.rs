@@ -21,6 +21,8 @@ mod tests {
     fn omit_branch_suffix_after_ticket_number() {
         assert_eq!("PROJECTQUEUE-1234",
                    ticket_number("PROJECTQUEUE-1234_one_more_pull_request").unwrap());
+        assert_eq!("PROJECTQUEUE-1234",
+                   ticket_number("PROJECTQUEUE-1234-one-more-pull-request").unwrap());
     }
 
     #[test]
