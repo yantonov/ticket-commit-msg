@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# general hook extension point
+# doc: https://git-scm.com/docs/githooks
 
 BACKUP_WD="$(pwd)"
 
