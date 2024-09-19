@@ -2,18 +2,27 @@
 
 Git commit hook that helps to add ticket/issue number to the commit message.
 
-### Motivation
+# Motivation
 When you use [youtrack](https://www.jetbrains.com/youtrack/), [tracker](https://yandex.com/tracker/), [jira](https://www.atlassian.com/software/jira), etc it is convenient to automatically add ticket number to the commit message.  
 This tool helps you to get rid of manual mechanics around it.  
 Idea: hook extracts ticket number from the branch name.
 
-### Mechanics
+# Table of contents
+1. [Mechanics](#mechanics)
+2. [Usage](#usage)
+3. [Customization](#customization)
+4. [Example](#example)
+5. [Links](#links)
+
+
+
+## Mechanics
 It is supposed that the branch name starts with the ticket number and uses the typical name convention  
 (example: QUEUE-123).  
 If ticket number can be extracted from branch name and it is not mentioned inside the commit message it will be included automatically on a separate line.  
 Otherwise commit message will remain unchanged.  
 
-### Usage:
+## Usage:
 1. add application to the PATH.  
 Binaries for each platform are available [here](https://github.com/yantonov/ticket-commit-msg/releases), you don't need to install Rust toolchain.  
 2. install commit-msg hook, using script [install/install-ticket-commit-msg-hook.sh](https://github.com/yantonov/ticket-commit-msg/blob/master/install/install-ticket-commit-msg-hook.sh)  
@@ -22,7 +31,7 @@ To simplify usage you can add install script also to the PATH.
 
 To simplify usage for several repositories you can add install directory to the PATH.
 
-### Customization
+## Customization
 You can set prefix for the ticket number using git config:
 ```
 git config custom.ticketnumberprefix 'Issue: '
@@ -30,7 +39,7 @@ git config custom.ticketnumberprefix 'Issue: '
 Then after you commit something while an active branch is QUEUE-123:  
 the following line will be added to the commit message: "Issue: QUEUE-123".
 
-### Example
+## Example
 ```
 test on master
 ❯ git br
@@ -90,5 +99,5 @@ Date:   Thu May 26 15:18:35 2022 +0200
     JIRA: QUEUE-123
 ```
 
-#### Links
+## Links
 1. [Git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)
