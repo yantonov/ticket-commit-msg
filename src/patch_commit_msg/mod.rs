@@ -41,7 +41,12 @@ enum PatchResult {
 
 fn prepare_prefix(prefix: String) -> String {
     let re = Regex::new(r"^(.*[^\r\n])([\r\n]*)$").unwrap();
-    re.replace(&prefix, "$1").to_string()
+    let prefix = re.replace(&prefix, "$1").trim().to_string();
+    if prefix.is_empty() {
+        "".to_string()
+    } else {
+        format!("{} ", prefix)
+    }
 }
 
 fn try_patch(lines: &[String], prefix: &str, ticket_number: &str) -> PatchResult {
@@ -155,7 +160,7 @@ mod tests {
     }
 
     #[test]
-    fn non_empty_prefix_expect_append() {
+    fn non_empty_prefix_with_space_expect_append() {
         let result = patch_commit_msg(
             &vector_of_string(
                 vec![
@@ -163,6 +168,26 @@ mod tests {
                     "2"]),
             &Some("ISSUE-123".to_string()),
             &Some("PREFIX: ".to_string()));
+        let expected = vector_of_string(
+            vec![
+                "1",
+                "2",
+                "",
+                "PREFIX: ISSUE-123",
+            ]
+        );
+        assert_eq!(&expected, &result);
+    }
+
+    #[test]
+    fn non_empty_prefix_without_space_expect_append() {
+        let result = patch_commit_msg(
+            &vector_of_string(
+                vec![
+                    "1",
+                    "2"]),
+            &Some("ISSUE-123".to_string()),
+            &Some("PREFIX:".to_string()));
         let expected = vector_of_string(
             vec![
                 "1",
