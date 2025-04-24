@@ -36,6 +36,8 @@ You can set prefix for the ticket number using git config:
 ```
 git config custom.ticketnumberprefix 'Issue: '
 ```
+Or you can set it in the environment variable `TICKET_PREFIX`.
+
 Then after you commit something while an active branch is QUEUE-123:  
 the following line will be added to the commit message: "Issue: QUEUE-123".
 

@@ -16,6 +16,8 @@ fn usage(env: &Environment) -> Result<(), String> {
     println!();
     println!("To set prefix for the ticket number:");
     println!("git config {} PREFIX_VALUE", GIT_CONFIG_PREFIX_PARAM);
+    println!();
+    println!("or use {} env var", environment::TICKET_PREFIX_ENV_VAR);
     Ok(())
 }
 
@@ -28,16 +30,10 @@ fn adjust_commit_message(env: &Environment) -> Result<(), String> {
         .map_err(|err| format!("cannot detect current branch: [details: {}]", err))?;
     let ticket_number = ticket_number::ticket_number(&branch);
     if ticket_number.is_some() {
-        let ticket_prefix = match process::exec(
-            "git",
-            &["config", GIT_CONFIG_PREFIX_PARAM]) {
-            Ok(prefix) => Some(prefix),
-            Err(_) => None
-        };
         let updated_commit_msg = patch_commit_msg::patch_commit_msg(
             &commit_msg,
             &ticket_number,
-            &ticket_prefix);
+            &env.prefix());
         file::write_file(&commit_msg_file, &updated_commit_msg)?;
     }
     Ok(())
