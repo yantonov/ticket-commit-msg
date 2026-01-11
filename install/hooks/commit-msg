@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# general hook extension point
+# general hook extension point GENERIC_COMMIT_HOOK_PLACEHOLDER
 # DO NOT remove previous line, it's used for idempotence check
 # doc: https://git-scm.com/docs/githooks
 

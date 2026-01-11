@@ -18,6 +18,12 @@ if [ ! -f "${GIT_ROOT}/.git/hooks/commit-msg" ]; then
         echo "Ok - commit hook is successfully installed"
     fi
 else
+    # Check if generic commit hook is already installed
+    if [ -n "$(cat ${GIT_ROOT}/.git/hooks/commit-msg | grep 'GENERIC_COMMIT_HOOK_PLACEHOLDER' || echo '')" ]; then
+        echo "[ERROR] Generic commit hook is already installed"
+        exit 1
+    fi
+
     if [ "$1" = "--force" ]; then
         if [ -z "$(cat ${GIT_ROOT}/.git/hooks/commit-msg | grep 'general hook extension point' || echo '')" ]; then
             mkdir -p "${GIT_ROOT}/.git/hooks/commit-msg-hooks"
