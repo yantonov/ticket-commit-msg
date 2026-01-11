@@ -15,27 +15,20 @@ if [ ! -f "${GIT_ROOT}/.git/hooks/commit-msg" ]; then
     HOOK_COUNT=$(ls -1 hooks | wc -l)
     if [ $HOOK_COUNT -gt 0 ]; then
         cp -irv hooks/* "$GIT_ROOT/.git/hooks"
-        echo "Ok - commit hook is successfully installed"
+        echo "[OK] Commit hook is successfully installed"
     fi
 else
-    # Check if generic commit hook is already installed
-    if [ -n "$(cat ${GIT_ROOT}/.git/hooks/commit-msg | grep 'GENERIC_COMMIT_HOOK_PLACEHOLDER' || echo '')" ]; then
-        echo "[ERROR] Generic commit hook is already installed"
-        exit 1
-    fi
-
     if [ "$1" = "--force" ]; then
-        if [ -z "$(cat ${GIT_ROOT}/.git/hooks/commit-msg | grep 'general hook extension point' || echo '')" ]; then
+        if [ -z "$(cat ${GIT_ROOT}/.git/hooks/commit-msg | grep 'GENERIC_COMMIT_HOOK_PLACEHOLDER' || echo '')" ]; then
             mkdir -p "${GIT_ROOT}/.git/hooks/commit-msg-hooks"
             mv "${GIT_ROOT}/.git/hooks/commit-msg" "${GIT_ROOT}/.git/hooks/commit-msg-hooks/0-commit-msg"
             cp -irv hooks/* "$GIT_ROOT/.git/hooks"
-            echo "OK - commit hook is successfully installed"
+            echo "[OK] Commit hook is successfully installed"
         else
-            echo "Warn - commit hook is already exist, if you want to modify, do it manually"
-            exit 1
-        fi
+            echo "[WARN] Commit hook is already exist, if you want to modify, do it manually"    
+        fi    
     else
-        echo "Warn - commit hook is already exist, if you want to modify, do it manually"
+        echo "[WARN] Commit hook is already exist, if you want to modify, do it manually"
         echo "If you want to force general commit hook use --force flag"
         echo "${SCRIPT} --force"
         echo "Be careful with this action. Think twice! Manual editing may be needed for the hook configuration."
