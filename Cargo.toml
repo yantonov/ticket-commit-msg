@@ -2,12 +2,12 @@
 name = "ticket-commit-msg"
 version = "0.1.6"
 authors = ["Yury Antonov <1390348+yantonov@users.noreply.github.com>"]
-edition = "2018"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-regex = "1.11.1"
+regex = "1.12.2"
 
 [profile.release]
 # https://github.com/johnthagen/min-sized-rust
