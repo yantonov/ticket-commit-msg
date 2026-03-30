@@ -12,12 +12,12 @@ pub struct Environment {
 
 impl Environment {
     pub fn commit_msg_file(&self) -> Result<PathBuf, String> {
-        if self.commit_msg_tmp_file == None {
+        if self.commit_msg_tmp_file.is_none() {
             Err("Commit message temporary file should be passed as first argument".to_string())
         } else {
-            Ok(Path::new(&self.commit_msg_tmp_file.clone().unwrap())
+            Ok(Path::new(self.commit_msg_tmp_file.as_deref().unwrap())
                 .canonicalize()
-                .unwrap())
+                .map_err(|e| format!("Cannot resolve commit message file path: {}", e))?)
         }
     }
 
