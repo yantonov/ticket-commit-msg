@@ -82,7 +82,7 @@ fn try_patch(lines: &[String], prefix: &str, ticket_number: &str) -> PatchResult
             }
         }
         if line_detector.is_service_data_line(line) || line_detector.is_ticket_number_line(line) {
-            if line.eq(ticket_number) {
+            if line == ticket_number {
                 return DoNothing;
             }
             non_empty_line_found = true;
@@ -105,12 +105,9 @@ pub fn patch_commit_msg(commit_msg: &[String],
     match ticket_number {
         None => {}
         Some(ticket) => {
-            let prepared_prefix = prepare_prefix(ticket_prefix
-                .clone()
-                .unwrap_or_else(|| "".to_string()));
-            let new_line = format!("{}{}",
-                                   prepared_prefix,
-                                   ticket.clone());
+            let prepared_prefix = prepare_prefix(
+                ticket_prefix.as_deref().unwrap_or("").to_string());
+            let new_line = format!("{}{}", prepared_prefix, ticket);
             let patch_result = try_patch(&lines, &prepared_prefix, &new_line);
             match patch_result {
                 DoNothing => {}
