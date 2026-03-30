@@ -22,7 +22,7 @@ impl Environment {
     }
 
     pub fn executable_name(&self) -> String {
-        Path::new(&self.executable.clone())
+        Path::new(&self.executable)
             .file_name()
             .expect("Fail to get executable file name")
             .to_str()
@@ -35,7 +35,7 @@ impl Environment {
     }
 
     pub fn show_usage(&self) -> bool {
-        self.commit_msg_tmp_file == None
+        self.commit_msg_tmp_file.is_none()
     }
 }
 
@@ -45,7 +45,7 @@ pub fn system_environment() -> Result<Environment, String> {
         "git",
         &["config", GIT_CONFIG_PREFIX_PARAM]) {
         Ok(prefix) => {
-            if prefix.trim().len() > 0 {
+            if !prefix.trim().is_empty() {
                 Some(prefix)
             }
             else {
@@ -54,10 +54,7 @@ pub fn system_environment() -> Result<Environment, String> {
         },
         Err(_) => None
     };
-    let ticket_prefix_from_env = match env::var(TICKET_PREFIX_ENV_VAR) {
-        Ok(prefix) => Some(prefix),
-        Err(_) => None
-    };
+    let ticket_prefix_from_env = env::var(TICKET_PREFIX_ENV_VAR).ok();
     
     Ok(Environment {
         executable: args.get(0)
