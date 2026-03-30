@@ -465,10 +465,6 @@ mod tests {
     }
 
     fn vector_of_string(v: Vec<&str>) -> Vec<String> {
-        let mut result: Vec<String> = vec![];
-        for item in v.iter() {
-            result.push(item.clone().to_string());
-        }
-        result
+        v.into_iter().map(String::from).collect()
     }
 }
