@@ -1,10 +1,14 @@
 use regex::Regex;
+use std::sync::LazyLock;
+
+static BRANCH_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(.*/|)([A-Z0-9]+-[0-9]+)[^/]*$").unwrap()
+});
 
 pub fn ticket_number(branch: &str) -> Option<String> {
-    let re = Regex::new(r"^(.*/|)([A-Z0-9]+-[0-9]+)[^/]*$")
-        .unwrap();
-    let captures = re.captures(branch);
-    captures.map(|value| value.get(2).unwrap().as_str().to_string())
+    BRANCH_RE
+        .captures(branch)
+        .map(|caps| caps.get(2).unwrap().as_str().to_string())
 }
 
 #[cfg(test)]
