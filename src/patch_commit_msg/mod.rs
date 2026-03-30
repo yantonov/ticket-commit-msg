@@ -1,15 +1,29 @@
-use regex::{Regex};
+use regex::Regex;
+use std::sync::LazyLock;
 use crate::patch_commit_msg::PatchResult::{Append, DoNothing, Insert};
+
+static RE_SERVICE_DATA: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^[A-Za-z_0-9-]+:.*").unwrap()
+});
+
+static RE_PREPARE_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(.*[^\r\n])([\r\n]*)$").unwrap()
+});
 
 struct LineDetector {
     prefix: String,
+    ticket_number_re: Regex,
 }
 
 impl LineDetector {
     pub fn new(prefix: &str) -> LineDetector {
-        return LineDetector {
-            prefix: prefix.to_string()
-        };
+        let ticket_number_re = Regex::new(
+            &format!("^{}[A-Z]+-[0-9-]+$", regex::escape(prefix))
+        ).expect("invalid ticket number regex");
+        LineDetector {
+            prefix: prefix.to_string(),
+            ticket_number_re,
+        }
     }
 
     pub fn is_empty_line(&self, line: &str) -> bool {
@@ -21,15 +35,11 @@ impl LineDetector {
     }
 
     fn is_service_data_line(&self, line: &str) -> bool {
-        // TODO: do not instantiate regex every time
-        let re = Regex::new(r"^[A-Za-z_0-9-]+:.*").unwrap();
-        return re.is_match(line);
+        RE_SERVICE_DATA.is_match(line)
     }
 
     fn is_ticket_number_line(&self, line: &str) -> bool {
-        // TODO: do not instantiate regex every time
-        let re = Regex::new(&format!("^{}[A-Z]+-[0-9-]+$", self.prefix)).unwrap();
-        return re.is_match(line);
+        self.ticket_number_re.is_match(line)
     }
 }
 
@@ -40,8 +50,7 @@ enum PatchResult {
 }
 
 fn prepare_prefix(prefix: String) -> String {
-    let re = Regex::new(r"^(.*[^\r\n])([\r\n]*)$").unwrap();
-    let prefix = re.replace(&prefix, "$1").trim().to_string();
+    let prefix = RE_PREPARE_PREFIX.replace(&prefix, "$1").trim().to_string();
     if prefix.is_empty() {
         "".to_string()
     } else {
