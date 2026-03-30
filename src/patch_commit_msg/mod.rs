@@ -50,6 +50,9 @@ fn prepare_prefix(prefix: String) -> String {
 }
 
 fn try_patch(lines: &[String], prefix: &str, ticket_number: &str) -> PatchResult {
+    if lines.is_empty() {
+        return Append;
+    }
     let line_detector = LineDetector::new(prefix);
     let lines_count = lines.len();
     let mut index = (lines_count - 1) as i32;
