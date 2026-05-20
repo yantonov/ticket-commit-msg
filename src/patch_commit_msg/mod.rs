@@ -11,7 +11,6 @@ static RE_PREPARE_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 struct LineDetector {
-    prefix: String,
     ticket_number_re: Regex,
 }
 
@@ -21,7 +20,6 @@ impl LineDetector {
             &format!("^{}[A-Z]+-[0-9-]+$", regex::escape(prefix))
         ).expect("invalid ticket number regex");
         LineDetector {
-            prefix: prefix.to_string(),
             ticket_number_re,
         }
     }
