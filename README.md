@@ -7,6 +7,9 @@ When you use [youtrack](https://www.jetbrains.com/youtrack/), [tracker](https://
 This tool helps you to get rid of manual mechanics around it.  
 Idea: hook extracts ticket number from the branch name.
 
+This tool is only about patching commit message based on branch name.  
+For JIRA you can create a branch based on current opened ticket another [tool](https://github.com/yantonov/jira-issue-selector/).
+
 # Table of contents
 1. [Mechanics](#mechanics)
 2. [Usage](#usage)
