@@ -60,7 +60,17 @@ pub fn system_environment() -> Result<Environment, String> {
         executable: args.get(0)
             .expect("executable is not defined")
             .to_string(),
-        commit_msg_tmp_file: args.get(1).cloned(),
+        commit_msg_tmp_file: {
+            let arg1 = args.get(1);
+
+            if arg1.map(String::as_str) == Some("--help")
+                && !Path::new("--help").exists()
+            {
+                None
+            } else {
+                arg1.cloned()
+            }
+        },
         prefix: ticket_prefix_from_config.or(ticket_prefix_from_env),
     })
 }
