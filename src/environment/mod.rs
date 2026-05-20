@@ -63,7 +63,7 @@ pub fn system_environment() -> Result<Environment, String> {
         commit_msg_tmp_file: {
             let arg1 = args.get(1);
 
-            if arg1.map(String::as_str) == Some("--help")
+            if (arg1.map(String::as_str) == Some("--help") || arg1.map(String::as_str) == Some("-h"))
                 && !Path::new("--help").exists()
             {
                 None
