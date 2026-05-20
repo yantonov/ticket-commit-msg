@@ -12,7 +12,7 @@ For JIRA you can create a branch based on current opened ticket another [tool](h
 
 # Table of contents
 1. [Mechanics](#mechanics)
-2. [Usage](#usage)
+2. [How to](#how-to)
 3. [Customization](#customization)
 4. [Example](#example)
 5. [Links](#links)
@@ -25,14 +25,23 @@ It is supposed that the branch name starts with the ticket number and uses the t
 If ticket number can be extracted from branch name and it is not mentioned inside the commit message it will be included automatically on a separate line.  
 Otherwise commit message will remain unchanged.  
 
-## Usage:
-1. add application to the PATH.  
-Binaries for each platform are available [here](https://github.com/yantonov/ticket-commit-msg/releases), you don't need to install Rust toolchain.  
-2. install commit-msg hook, using script [install/install-ticket-commit-msg-hook.sh](https://github.com/yantonov/ticket-commit-msg/blob/master/install/install-ticket-commit-msg-hook.sh)  
-To simplify usage you can add install script also to the PATH.  
-3. commit something  
+## How to
 
-To simplify usage for several repositories you can add install directory to the PATH.
+1. Use following snippet to download latest binary to ${HOME}/bin  
+```bash
+    curl -fsSL "https://raw.githubusercontent.com/yantonov/ticket-commit-msg/master/bin/download.sh" | bash
+```
+This binary is intended to update the commit message based on current branch name.  
+If you prefer you can download the binary [manually](https://github.com/yantonov/ticket-commit-msg/releases) and add application to the PATH
+
+2. clone the repo and add [install](https://github.com/yantonov/ticket-commit-msg/tree/master/install) directory to PATH
+
+3. install commit-msg hook, by calling the script from the target git repo
+```bash
+    install-ticket-commit-msg-hook.sh
+```
+
+4. commit something  
 
 ## Customization
 You can set prefix for the ticket number using git config:
@@ -47,31 +56,31 @@ the following line will be added to the commit message: "Issue: QUEUE-123".
 ## Example
 ```
 test on master
-❯ git br
+> git br
 * master 8692399 initial commit
 
 test on master
-❯ git branch
+> git branch
 * master
 
 test on master
-❯ git checkout -b QUEUE-123
+> git checkout -b QUEUE-123
 Switched to a new branch 'QUEUE-123'
 
 test on QUEUE-123
-❯ touch test.txt
+> touch test.txt
 
 test on QUEUE-123 [?]
-❯ git add .
+> git add .
 
 test on QUEUE-123 [+]
-❯ git commit -m 'Test'
+> git commit -m 'Test'
 [QUEUE-123 352c7c4] Test QUEUE-123
  1 file changed, 0 insertions(+), 0 deletions(-)
  create mode 100644 test.txt
 
 test on QUEUE-123
-❯ git log -n 1
+> git log -n 1
 commit 352c7c4d9a0db7a7fa91a1a8d9ea937143192116 (HEAD -> QUEUE-123)
 Author: Yury Antonov <1390348+yantonov@users.noreply.github.com>
 Date:   Thu May 26 15:17:36 2022 +0200
@@ -80,22 +89,22 @@ Date:   Thu May 26 15:17:36 2022 +0200
     QUEUE-123
 
 test on QUEUE-123
-❯ git config custom.ticketnumberprefix 'JIRA: '
+> git config custom.ticketnumberprefix 'JIRA: '
 
 test on QUEUE-123
-❯ touch test2.txt
+> touch test2.txt
 
 test on QUEUE-123 [?]
-❯ git add .
+> git add .
 
 test on QUEUE-123 [+]
-❯ git commit -m 'Test 2'
+> git commit -m 'Test 2'
 [QUEUE-123 d0c99a4] Test 2 JIRA: QUEUE-123
  1 file changed, 0 insertions(+), 0 deletions(-)
  create mode 100644 test2.txt
 
 test on QUEUE-123
-❯ git log -n 1
+> git log -n 1
 commit d0c99a4fa7d46ea65166e460d52bbeda077a8978 (HEAD -> QUEUE-123)
 Author: Yury Antonov <1390348+yantonov@users.noreply.github.com>
 Date:   Thu May 26 15:18:35 2022 +0200
