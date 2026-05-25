@@ -27,21 +27,25 @@ Otherwise commit message will remain unchanged.
 
 ## How to
 
-1. Use following snippet to download latest binary to ${HOME}/bin  
+1. Download the latest `ticket-commit-msg` binary to `${HOME}/bin`:
 ```bash
     curl -fsSL "https://raw.githubusercontent.com/yantonov/ticket-commit-msg/master/bin/download.sh" | bash
 ```
 This binary is intended to update the commit message based on current branch name.  
-If you prefer you can download the binary [manually](https://github.com/yantonov/ticket-commit-msg/releases) and add application to the PATH
+If you prefer you can download the binary [manually](https://github.com/yantonov/ticket-commit-msg/releases) and add it to your `PATH`.
 
-2. clone the repo and add [install](https://github.com/yantonov/ticket-commit-msg/tree/master/install) directory to PATH
-
-3. install commit-msg hook, by calling the script from the target git repo
+2. Install [krok](https://github.com/yantonov/krok) — a tiny git hook manager used to attach this binary to the `commit-msg` hook:
 ```bash
-    install-ticket-commit-msg-hook.sh
+    curl -fsSL https://raw.githubusercontent.com/yantonov/krok/master/bin/download.sh | sh
+```
+See the [krok README](https://github.com/yantonov/krok) for alternative installation methods.
+
+3. From inside the target git repository, register the hook:
+```bash
+    krok add commit-msg ticket-commit-msg
 ```
 
-4. commit something  
+4. Commit something.
 
 ## Customization
 You can set prefix for the ticket number using git config:
