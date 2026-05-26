@@ -12,7 +12,7 @@ For JIRA you can create a branch based on current opened ticket another [tool](h
 
 # Table of contents
 1. [Mechanics](#mechanics)
-2. [How to](#how-to)
+2. [Installation](#installation)
 3. [Customization](#customization)
 4. [Example](#example)
 5. [Links](#links)
@@ -25,7 +25,7 @@ It is supposed that the branch name starts with the ticket number and uses the t
 If ticket number can be extracted from branch name and it is not mentioned inside the commit message it will be included automatically on a separate line.  
 Otherwise commit message will remain unchanged.  
 
-## How to
+## Installation
 
 1. Download the latest `ticket-commit-msg` binary to `${HOME}/bin`:
 ```bash
