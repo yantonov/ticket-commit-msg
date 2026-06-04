@@ -39,7 +39,8 @@ If you prefer you can download the binary [manually](https://github.com/yantonov
 to do it you can
 
 - set/update commit hook (commit-msg) manually (see git [documentation](https://git-scm.com/docs/githooks)) or 
-- use tiny git hook manager (see notes below)
+- use any existing git hook managers ([hk](https://github.com/jdx/hk), [pre-commit](https://pre-commit.com/), [autohook](https://github.com/Autohook/Autohook), [lefthook](https://github.com/evilmartians/lefthook))
+- use [krok](https://github.com/yantonov/krok) a tiny git hook manager (see notes below)
 
 Install [krok](https://github.com/yantonov/krok) — a tiny git hook manager used to attach this binary to the `commit-msg` hook:
 ```bash
