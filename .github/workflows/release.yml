@@ -42,7 +42,7 @@ jobs:
           echo "RELEASE_TAG=$( echo ${GITHUB_REF##*/} )" >> $GITHUB_ENV
 
       - name: create archive
-        uses: master-atul/tar-action@v1.0.2
+        uses: master-atul/tar-action@v1.2.0
         with:
           command: c
           cwd: ./target/release/
@@ -63,7 +63,7 @@ jobs:
           cat "${archive}.sha256"
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           draft: true
           files: |
