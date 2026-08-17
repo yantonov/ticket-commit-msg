@@ -27,7 +27,7 @@ Otherwise commit message will remain unchanged.
 
 ## Installation
 
-1. Download the latest `ticket-commit-msg` binary to `${HOME}/bin`:
+1. Download the latest `ticket-commit-msg` binary to `${HOME}/.local/bin`:
 ```bash
     curl -fsSL "https://raw.githubusercontent.com/yantonov/ticket-commit-msg/master/bin/install/download.sh" | bash
 ```

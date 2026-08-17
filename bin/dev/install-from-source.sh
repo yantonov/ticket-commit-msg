@@ -8,7 +8,7 @@ EXECUTABLE_NAME="ticket-commit-msg"
 
 bin/dev/release.sh
 
-TARGET_DIR="${HOME}/bin"
+TARGET_DIR="${HOME}/.local/bin"
 mkdir -p "${TARGET_DIR}"
 
 cp "$(pwd)/target/release/${EXECUTABLE_NAME}" "${TARGET_DIR}/${EXECUTABLE_NAME}"
