@@ -2,11 +2,11 @@
 
 set -eu
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 EXECUTABLE_NAME="ticket-commit-msg"
 
-bin/release.sh
+bin/dev/release.sh
 
 TARGET_DIR="${HOME}/bin"
 mkdir -p "${TARGET_DIR}"
