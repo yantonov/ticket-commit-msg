@@ -5,9 +5,6 @@ use std::sync::LazyLock;
 static RE_SERVICE_DATA: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[A-Za-z_0-9-]+:.*").unwrap());
 
-static RE_PREPARE_PREFIX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^(.*[^\r\n])([\r\n]*)$").unwrap());
-
 struct LineDetector {
     ticket_number_re: Regex,
 }
@@ -43,7 +40,7 @@ enum PatchResult {
 }
 
 fn prepare_prefix(prefix: String) -> String {
-    let prefix = RE_PREPARE_PREFIX.replace(&prefix, "$1").trim().to_string();
+    let prefix = prefix.trim().to_string();
     if prefix.is_empty() {
         "".to_string()
     } else {
