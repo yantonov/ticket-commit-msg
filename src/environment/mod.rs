@@ -55,7 +55,7 @@ pub fn system_environment() -> Result<Environment, String> {
     let ticket_prefix_from_env = env::var(TICKET_PREFIX_ENV_VAR).ok();
 
     Ok(Environment {
-        executable: args.get(0).expect("executable is not defined").to_string(),
+        executable: args.first().expect("executable is not defined").to_string(),
         commit_msg_tmp_file: {
             let arg1 = args.get(1);
 
