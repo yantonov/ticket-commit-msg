@@ -34,6 +34,11 @@ Otherwise commit message will remain unchanged.
 This binary is intended to update the commit message based on current branch name.  
 If you prefer you can download the binary [manually](https://github.com/yantonov/ticket-commit-msg/releases) and add it to your `PATH`.
 
+Alternatively, build and install from source (requires a Rust toolchain):
+```bash
+    bin/install/install-from-source.sh
+```
+
 2. Install commit hook
 
 to do it you can
