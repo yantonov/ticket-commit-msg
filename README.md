@@ -29,7 +29,7 @@ Otherwise commit message will remain unchanged.
 
 1. Download the latest `ticket-commit-msg` binary to `${HOME}/bin`:
 ```bash
-    curl -fsSL "https://raw.githubusercontent.com/yantonov/ticket-commit-msg/master/bin/download.sh" | bash
+    curl -fsSL "https://raw.githubusercontent.com/yantonov/ticket-commit-msg/master/bin/install/download.sh" | bash
 ```
 This binary is intended to update the commit message based on current branch name.  
 If you prefer you can download the binary [manually](https://github.com/yantonov/ticket-commit-msg/releases) and add it to your `PATH`.
