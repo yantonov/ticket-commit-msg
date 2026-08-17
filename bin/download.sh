@@ -45,7 +45,10 @@ case "${LATEST_TAG}" in
 esac
 
 EXECUTABLE_FILENAME="ticket-commit-msg"
-ARCHIVE_NAME="${EXECUTABLE_FILENAME}-${OS}-${LATEST_TAG}.tar.gz"
+# Release assets carry the architecture as uname reports it, so no mapping is
+# needed here: x86_64 and aarch64 on linux, x86_64 and arm64 on macos.
+ARCH="$(uname -m)"
+ARCHIVE_NAME="${EXECUTABLE_FILENAME}-${OS}-${ARCH}-${LATEST_TAG}.tar.gz"
 DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${LATEST_TAG}/${ARCHIVE_NAME}"
 
 echo "Latest tag: ${LATEST_TAG}"
