@@ -1,15 +1,14 @@
 use crate::patch_commit_msg::PatchResult::{Append, DoNothing, Insert};
-use regex::Regex;
 
 struct LineDetector {
-    ticket_number_re: Regex,
+    prefix: String,
 }
 
 impl LineDetector {
     pub fn new(prefix: &str) -> LineDetector {
-        let ticket_number_re = Regex::new(&format!("^{}[A-Z]+-[0-9-]+$", regex::escape(prefix)))
-            .expect("invalid ticket number regex");
-        LineDetector { ticket_number_re }
+        LineDetector {
+            prefix: prefix.to_string(),
+        }
     }
 
     pub fn is_empty_line(&self, line: &str) -> bool {
@@ -31,8 +30,28 @@ impl LineDetector {
         }
     }
 
+    // Equivalent to matching ^{prefix}[A-Z]+-[0-9-]+$ against the line: the
+    // literal prefix, then a key of uppercase letters, a dash, and a tail of
+    // digits/dashes running to the end of the line.
     fn is_ticket_number_line(&self, line: &str) -> bool {
-        self.ticket_number_re.is_match(line)
+        let Some(rest) = line.strip_prefix(self.prefix.as_str()) else {
+            return false;
+        };
+        let bytes = rest.as_bytes();
+
+        let key_end = bytes
+            .iter()
+            .position(|b| !b.is_ascii_uppercase())
+            .unwrap_or(bytes.len());
+        if key_end == 0 || bytes.get(key_end) != Some(&b'-') {
+            return false;
+        }
+
+        let tail_start = key_end + 1;
+        tail_start < bytes.len()
+            && bytes[tail_start..]
+                .iter()
+                .all(|b| b.is_ascii_digit() || *b == b'-')
     }
 }
 
