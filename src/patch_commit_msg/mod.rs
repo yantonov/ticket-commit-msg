@@ -1,14 +1,12 @@
+use crate::patch_commit_msg::PatchResult::{Append, DoNothing, Insert};
 use regex::Regex;
 use std::sync::LazyLock;
-use crate::patch_commit_msg::PatchResult::{Append, DoNothing, Insert};
 
-static RE_SERVICE_DATA: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^[A-Za-z_0-9-]+:.*").unwrap()
-});
+static RE_SERVICE_DATA: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^[A-Za-z_0-9-]+:.*").unwrap());
 
-static RE_PREPARE_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^(.*[^\r\n])([\r\n]*)$").unwrap()
-});
+static RE_PREPARE_PREFIX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(.*[^\r\n])([\r\n]*)$").unwrap());
 
 struct LineDetector {
     ticket_number_re: Regex,
@@ -16,12 +14,9 @@ struct LineDetector {
 
 impl LineDetector {
     pub fn new(prefix: &str) -> LineDetector {
-        let ticket_number_re = Regex::new(
-            &format!("^{}[A-Z]+-[0-9-]+$", regex::escape(prefix))
-        ).expect("invalid ticket number regex");
-        LineDetector {
-            ticket_number_re,
-        }
+        let ticket_number_re = Regex::new(&format!("^{}[A-Z]+-[0-9-]+$", regex::escape(prefix)))
+            .expect("invalid ticket number regex");
+        LineDetector { ticket_number_re }
     }
 
     pub fn is_empty_line(&self, line: &str) -> bool {
@@ -92,19 +87,21 @@ fn try_patch(lines: &[String], prefix: &str, ticket_number: &str) -> PatchResult
     }
     match service_info_line {
         None => Append,
-        Some(v) => Insert(v)
+        Some(v) => Insert(v),
     }
 }
 
-pub fn patch_commit_msg(commit_msg: &[String],
-                        ticket_number: &Option<String>,
-                        ticket_prefix: &Option<String>) -> Vec<String> {
+pub fn patch_commit_msg(
+    commit_msg: &[String],
+    ticket_number: &Option<String>,
+    ticket_prefix: &Option<String>,
+) -> Vec<String> {
     let mut lines: Vec<String> = commit_msg.to_vec();
     match ticket_number {
         None => {}
         Some(ticket) => {
-            let prepared_prefix = prepare_prefix(
-                ticket_prefix.as_deref().unwrap_or("").to_string());
+            let prepared_prefix =
+                prepare_prefix(ticket_prefix.as_deref().unwrap_or("").to_string());
             let new_line = format!("{}{}", prepared_prefix, ticket);
             let patch_result = try_patch(&lines, &prepared_prefix, &new_line);
             match patch_result {
@@ -131,334 +128,248 @@ mod tests {
 
     #[test]
     fn ticket_number_is_undefined_expect_do_nothing() {
-        let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "2"]),
-            &None,
-            &None);
-        let expected = vector_of_string(
-            vec![
-                "1",
-                "2",
-            ]);
+        let result = patch_commit_msg(&vector_of_string(vec!["1", "2"]), &None, &None);
+        let expected = vector_of_string(vec!["1", "2"]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn empty_prefix_expect_append() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "2"]),
+            &vector_of_string(vec!["1", "2"]),
             &Some("ISSUE-123".to_string()),
-            &None);
-        let expected = vector_of_string(
-            vec![
-                "1",
-                "2",
-                "",
-                "ISSUE-123",
-            ]
+            &None,
         );
+        let expected = vector_of_string(vec!["1", "2", "", "ISSUE-123"]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn non_empty_prefix_with_space_expect_append() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "2"]),
+            &vector_of_string(vec!["1", "2"]),
             &Some("ISSUE-123".to_string()),
-            &Some("PREFIX: ".to_string()));
-        let expected = vector_of_string(
-            vec![
-                "1",
-                "2",
-                "",
-                "PREFIX: ISSUE-123",
-            ]
+            &Some("PREFIX: ".to_string()),
         );
+        let expected = vector_of_string(vec!["1", "2", "", "PREFIX: ISSUE-123"]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn non_empty_prefix_without_space_expect_append() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "2"]),
+            &vector_of_string(vec!["1", "2"]),
             &Some("ISSUE-123".to_string()),
-            &Some("PREFIX:".to_string()));
-        let expected = vector_of_string(
-            vec![
-                "1",
-                "2",
-                "",
-                "PREFIX: ISSUE-123",
-            ]
+            &Some("PREFIX:".to_string()),
         );
+        let expected = vector_of_string(vec!["1", "2", "", "PREFIX: ISSUE-123"]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn ticket_number_inside_the_text_expect_append() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "blablabla ISSUE-123 blablabla"]),
+            &vector_of_string(vec!["1", "blablabla ISSUE-123 blablabla"]),
             &Some("ISSUE-123".to_string()),
-            &None);
-        let expected = vector_of_string(
-            vec![
-                "1",
-                "blablabla ISSUE-123 blablabla",
-                "",
-                "ISSUE-123",
-            ]
+            &None,
         );
+        let expected =
+            vector_of_string(vec!["1", "blablabla ISSUE-123 blablabla", "", "ISSUE-123"]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn ticket_number_is_found_along_with_prefix_but_with_different_suffix_expect_append() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "Ticket ISSUE-123 unknown suffix"]),
+            &vector_of_string(vec!["1", "Ticket ISSUE-123 unknown suffix"]),
             &Some("ISSUE-123".to_string()),
-            &Some("Ticket ".to_string()));
-        let expected = vector_of_string(
-            vec![
-                "1",
-                "Ticket ISSUE-123 unknown suffix",
-                "",
-                "Ticket ISSUE-123",
-            ]
+            &Some("Ticket ".to_string()),
         );
+        let expected = vector_of_string(vec![
+            "1",
+            "Ticket ISSUE-123 unknown suffix",
+            "",
+            "Ticket ISSUE-123",
+        ]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
-    fn ticket_number_is_found_as_service_line_with_prefix_but_with_different_suffix_expect_insert() {
+    fn ticket_number_is_found_as_service_line_with_prefix_but_with_different_suffix_expect_insert()
+    {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "Ticket: ISSUE-123 unknown suffix"]),
+            &vector_of_string(vec!["1", "Ticket: ISSUE-123 unknown suffix"]),
             &Some("ISSUE-123".to_string()),
-            &Some("Ticket: ".to_string()));
-        let expected = vector_of_string(
-            vec![
-                "1",
-                "",
-                "Ticket: ISSUE-123",
-                "Ticket: ISSUE-123 unknown suffix",
-            ]
+            &Some("Ticket: ".to_string()),
         );
+        let expected = vector_of_string(vec![
+            "1",
+            "",
+            "Ticket: ISSUE-123",
+            "Ticket: ISSUE-123 unknown suffix",
+        ]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn ticket_number_is_found_but_with_different_prefix_and_without_suffix_expect_append() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "",
-                    "another prefix ISSUE-123"]),
+            &vector_of_string(vec!["1", "", "another prefix ISSUE-123"]),
             &Some("ISSUE-123".to_string()),
-            &Some("Ticket: ".to_string()));
-        let expected = vector_of_string(
-            vec![
-                "1",
-                "",
-                "another prefix ISSUE-123",
-                "",
-                "Ticket: ISSUE-123",
-            ]
+            &Some("Ticket: ".to_string()),
         );
+        let expected = vector_of_string(vec![
+            "1",
+            "",
+            "another prefix ISSUE-123",
+            "",
+            "Ticket: ISSUE-123",
+        ]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn ticket_number_is_found_without_prefix_expect_append() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "",
-                    "ISSUE-123"]),
+            &vector_of_string(vec!["1", "", "ISSUE-123"]),
             &Some("ISSUE-123".to_string()),
-            &Some("Ticket: ".to_string()));
-        let expected = vector_of_string(
-            vec![
-                "1",
-                "",
-                "ISSUE-123",
-                "",
-                "Ticket: ISSUE-123",
-            ]
+            &Some("Ticket: ".to_string()),
         );
+        let expected = vector_of_string(vec!["1", "", "ISSUE-123", "", "Ticket: ISSUE-123"]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn ticket_number_is_found_only_inside_commented_line_expect_append() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "# comment ISSUE-123",
-                    "# another comment line"]),
+            &vector_of_string(vec!["1", "# comment ISSUE-123", "# another comment line"]),
             &Some("ISSUE-123".to_string()),
-            &None);
-        let expected = vector_of_string(
-            vec![
-                "1",
-                "# comment ISSUE-123",
-                "# another comment line",
-                "",
-                "ISSUE-123",
-            ]
+            &None,
         );
+        let expected = vector_of_string(vec![
+            "1",
+            "# comment ISSUE-123",
+            "# another comment line",
+            "",
+            "ISSUE-123",
+        ]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn prefix_contains_eoln_expect_eoln_is_removed() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "2"]),
+            &vector_of_string(vec!["1", "2"]),
             &Some("ISSUE-123".to_string()),
-            &Some("PREFIX: \r\n\r\n\r".to_string()));
-        let expected = vector_of_string(
-            vec![
-                "1",
-                "2",
-                "",
-                "PREFIX: ISSUE-123",
-            ]
+            &Some("PREFIX: \r\n\r\n\r".to_string()),
         );
+        let expected = vector_of_string(vec!["1", "2", "", "PREFIX: ISSUE-123"]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn add_ticket_number_before_service_data() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "Change-Id: 111222",
-                    "Another-Service_Info: 333444"]),
-            &Some("ISSUE-123".to_string()),
-            &None);
-        let expected = vector_of_string(
-            vec![
+            &vector_of_string(vec![
                 "1",
-                "",
-                "ISSUE-123",
                 "Change-Id: 111222",
                 "Another-Service_Info: 333444",
-            ]
+            ]),
+            &Some("ISSUE-123".to_string()),
+            &None,
         );
+        let expected = vector_of_string(vec![
+            "1",
+            "",
+            "ISSUE-123",
+            "Change-Id: 111222",
+            "Another-Service_Info: 333444",
+        ]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn ignore_trailing_empty_lines_after_service_lines() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "Change-Id: 111222",
-                    "# tmp line",
-                    "",
-                    "Change-Id: 333444",
-                    "",
-                    "",
-                    "# large",
-                    "# commented",
-                    "# block"]),
-            &Some("ISSUE-123".to_string()),
-            &None);
-
-        let expected = vector_of_string(
-            vec![
+            &vector_of_string(vec![
                 "1",
                 "Change-Id: 111222",
                 "# tmp line",
                 "",
-                "ISSUE-123",
                 "Change-Id: 333444",
                 "",
                 "",
                 "# large",
                 "# commented",
                 "# block",
-            ]
+            ]),
+            &Some("ISSUE-123".to_string()),
+            &None,
         );
+
+        let expected = vector_of_string(vec![
+            "1",
+            "Change-Id: 111222",
+            "# tmp line",
+            "",
+            "ISSUE-123",
+            "Change-Id: 333444",
+            "",
+            "",
+            "# large",
+            "# commented",
+            "# block",
+        ]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn patch_only_the_last_block_of_service_lines() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "ISSUE-123",
-                    "Change-Id: 111222",
-                    "",
-                    "Another-Service_Info: 333444"]),
-            &Some("ISSUE-123".to_string()),
-            &None);
-        let expected = vector_of_string(
-            vec![
+            &vector_of_string(vec![
                 "1",
                 "ISSUE-123",
                 "Change-Id: 111222",
                 "",
-                "ISSUE-123",
                 "Another-Service_Info: 333444",
-            ]
+            ]),
+            &Some("ISSUE-123".to_string()),
+            &None,
         );
+        let expected = vector_of_string(vec![
+            "1",
+            "ISSUE-123",
+            "Change-Id: 111222",
+            "",
+            "ISSUE-123",
+            "Another-Service_Info: 333444",
+        ]);
         assert_eq!(&expected, &result);
     }
 
     #[test]
     fn last_service_block_contains_ticket_number_expect_do_nothing() {
         let result = patch_commit_msg(
-            &vector_of_string(
-                vec![
-                    "1",
-                    "ISSUE-123",
-                    "Change-Id: 111222",
-                    "",
-                    "ISSUE-124",
-                    "Another-Service_Info: 333444"]),
-            &Some("ISSUE-123".to_string()),
-            &None);
-        let expected = vector_of_string(
-            vec![
+            &vector_of_string(vec![
                 "1",
                 "ISSUE-123",
                 "Change-Id: 111222",
                 "",
-                "ISSUE-123",
                 "ISSUE-124",
                 "Another-Service_Info: 333444",
-            ]
+            ]),
+            &Some("ISSUE-123".to_string()),
+            &None,
         );
+        let expected = vector_of_string(vec![
+            "1",
+            "ISSUE-123",
+            "Change-Id: 111222",
+            "",
+            "ISSUE-123",
+            "ISSUE-124",
+            "Another-Service_Info: 333444",
+        ]);
         assert_eq!(&expected, &result);
     }
 

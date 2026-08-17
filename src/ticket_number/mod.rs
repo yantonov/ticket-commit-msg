@@ -1,9 +1,8 @@
 use regex::Regex;
 use std::sync::LazyLock;
 
-static BRANCH_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^(.*/|)([A-Z0-9]+-[0-9]+)[^/]*$").unwrap()
-});
+static BRANCH_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(.*/|)([A-Z0-9]+-[0-9]+)[^/]*$").unwrap());
 
 pub fn ticket_number(branch: &str) -> Option<String> {
     BRANCH_RE
@@ -17,22 +16,30 @@ mod tests {
 
     #[test]
     fn simple_scenario_branch_name_is_equal_to_ticket_name() {
-        assert_eq!("PROJECTQUEUE-1234",
-                   ticket_number("PROJECTQUEUE-1234").unwrap());
+        assert_eq!(
+            "PROJECTQUEUE-1234",
+            ticket_number("PROJECTQUEUE-1234").unwrap()
+        );
     }
 
     #[test]
     fn omit_branch_suffix_after_ticket_number() {
-        assert_eq!("PROJECTQUEUE-1234",
-                   ticket_number("PROJECTQUEUE-1234_one_more_pull_request").unwrap());
-        assert_eq!("PROJECTQUEUE-1234",
-                   ticket_number("PROJECTQUEUE-1234-one-more-pull-request").unwrap());
+        assert_eq!(
+            "PROJECTQUEUE-1234",
+            ticket_number("PROJECTQUEUE-1234_one_more_pull_request").unwrap()
+        );
+        assert_eq!(
+            "PROJECTQUEUE-1234",
+            ticket_number("PROJECTQUEUE-1234-one-more-pull-request").unwrap()
+        );
     }
 
     #[test]
     fn omit_user_prefix() {
-        assert_eq!("PROJECTQUEUE-1234",
-                   ticket_number("users/username/PROJECTQUEUE-1234").unwrap());
+        assert_eq!(
+            "PROJECTQUEUE-1234",
+            ticket_number("users/username/PROJECTQUEUE-1234").unwrap()
+        );
     }
 
     #[test]

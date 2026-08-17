@@ -1,6 +1,6 @@
+use crate::{GIT_CONFIG_PREFIX_PARAM, process};
 use std::env;
 use std::path::{Path, PathBuf};
-use crate::{process, GIT_CONFIG_PREFIX_PARAM};
 
 pub const TICKET_PREFIX_ENV_VAR: &str = "TICKET_PREFIX";
 
@@ -29,7 +29,7 @@ impl Environment {
             .expect("Fail to convert executable file name to string")
             .to_string()
     }
-    
+
     pub fn prefix(&self) -> Option<String> {
         self.prefix.clone()
     }
@@ -41,29 +41,26 @@ impl Environment {
 
 pub fn system_environment() -> Result<Environment, String> {
     let args: Vec<String> = env::args().collect();
-    let ticket_prefix_from_config = match process::exec(
-        "git",
-        &["config", GIT_CONFIG_PREFIX_PARAM]) {
+    let ticket_prefix_from_config = match process::exec("git", &["config", GIT_CONFIG_PREFIX_PARAM])
+    {
         Ok(prefix) => {
             if !prefix.trim().is_empty() {
                 Some(prefix)
-            }
-            else {
+            } else {
                 None
             }
-        },
-        Err(_) => None
+        }
+        Err(_) => None,
     };
     let ticket_prefix_from_env = env::var(TICKET_PREFIX_ENV_VAR).ok();
-    
+
     Ok(Environment {
-        executable: args.get(0)
-            .expect("executable is not defined")
-            .to_string(),
+        executable: args.get(0).expect("executable is not defined").to_string(),
         commit_msg_tmp_file: {
             let arg1 = args.get(1);
 
-            if (arg1.map(String::as_str) == Some("--help") || arg1.map(String::as_str) == Some("-h"))
+            if (arg1.map(String::as_str) == Some("--help")
+                || arg1.map(String::as_str) == Some("-h"))
                 && !Path::new("--help").exists()
             {
                 None
