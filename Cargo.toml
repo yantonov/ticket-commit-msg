@@ -7,6 +7,9 @@ rust-version = "1.85"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[dev-dependencies]
+tempfile = "3"
+
 [profile.release]
 # https://github.com/johnthagen/min-sized-rust
 strip = true  # Automatically strip symbols from the binary.
