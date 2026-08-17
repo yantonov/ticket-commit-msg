@@ -29,12 +29,10 @@ jobs:
     # build
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
 
       - name: enable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+        uses: dtolnay/rust-toolchain@stable
 
       - name: build
         run: cargo build --release
