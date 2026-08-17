@@ -1,9 +1,5 @@
 use crate::patch_commit_msg::PatchResult::{Append, DoNothing, Insert};
 use regex::Regex;
-use std::sync::LazyLock;
-
-static RE_SERVICE_DATA: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^[A-Za-z_0-9-]+:.*").unwrap());
 
 struct LineDetector {
     ticket_number_re: Regex,
@@ -24,8 +20,15 @@ impl LineDetector {
         line.starts_with('#')
     }
 
+    // Equivalent to matching ^[A-Za-z_0-9-]+:.* against the line: a leading
+    // run of identifier characters immediately followed by a colon.
     fn is_service_data_line(&self, line: &str) -> bool {
-        RE_SERVICE_DATA.is_match(line)
+        match line.find(':') {
+            Some(idx) if idx > 0 => line.as_bytes()[..idx]
+                .iter()
+                .all(|b| b.is_ascii_alphanumeric() || *b == b'_' || *b == b'-'),
+            _ => false,
+        }
     }
 
     fn is_ticket_number_line(&self, line: &str) -> bool {
