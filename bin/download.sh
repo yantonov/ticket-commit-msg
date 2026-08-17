@@ -26,11 +26,23 @@ esac
 
 REPO="yantonov/ticket-commit-msg"
 
-# Get latest tag
-LATEST_TAG=$(
-  curl -fsSL "https://api.github.com/repos/${REPO}/tags" \
-  | jq -r '.[0].name'
-)
+# The version comes from the latest published release rather than from the tag
+# list. A tag exists the moment it is pushed, while the release built from it
+# stays a draft until someone publishes it, so the newest tag can easily point
+# at assets that cannot be downloaded yet. Following the redirect of the
+# 'latest release' page also keeps this free of a json parser and of the
+# unauthenticated api rate limit.
+LATEST_TAG="$(
+  curl -fsSLo /dev/null -w '%{url_effective}' "https://github.com/${REPO}/releases/latest" \
+  | sed 's#.*/tag/##'
+)"
+
+case "${LATEST_TAG}" in
+  ''|*/*)
+    echo "Cannot detect the latest published release of ${REPO}"
+    exit 1
+    ;;
+esac
 
 EXECUTABLE_FILENAME="ticket-commit-msg"
 ARCHIVE_NAME="${EXECUTABLE_FILENAME}-${OS}-${LATEST_TAG}.tar.gz"
