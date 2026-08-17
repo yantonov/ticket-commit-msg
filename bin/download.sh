@@ -43,8 +43,6 @@ TMP_DIR="$(mktemp -d)"
 ARCHIVE_PATH="${TMP_DIR}/${EXECUTABLE_FILENAME}.tar.gz"
 CHECKSUM_PATH="${ARCHIVE_PATH}.sha256"
 
-echo $ARCHIVE_PATH
-
 # Download archive and the checksum published next to it
 curl -fL "${DOWNLOAD_URL}" -o "${ARCHIVE_PATH}"
 curl -fL "${DOWNLOAD_URL}.sha256" -o "${CHECKSUM_PATH}"
