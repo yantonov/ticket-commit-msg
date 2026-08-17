@@ -1,13 +1,29 @@
-use regex::Regex;
-use std::sync::LazyLock;
-
-static BRANCH_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^(.*/|)([A-Z0-9]+-[0-9]+)[^/]*$").unwrap());
-
+// Equivalent to matching ^(.*/|)([A-Z0-9]+-[0-9]+)[^/]*$ against the branch
+// name: the ticket key sits at the start of the last '/'-delimited segment,
+// with any remaining suffix (other than another '/') ignored.
 pub fn ticket_number(branch: &str) -> Option<String> {
-    BRANCH_RE
-        .captures(branch)
-        .map(|caps| caps.get(2).unwrap().as_str().to_string())
+    let segment = branch.rsplit('/').next().unwrap_or(branch);
+    let bytes = segment.as_bytes();
+
+    let key_end = bytes
+        .iter()
+        .position(|b| !(b.is_ascii_uppercase() || b.is_ascii_digit()))
+        .unwrap_or(bytes.len());
+    if key_end == 0 || bytes.get(key_end) != Some(&b'-') {
+        return None;
+    }
+
+    let digits_start = key_end + 1;
+    let digits_end = bytes[digits_start..]
+        .iter()
+        .position(|b| !b.is_ascii_digit())
+        .map(|offset| digits_start + offset)
+        .unwrap_or(bytes.len());
+    if digits_end == digits_start {
+        return None;
+    }
+
+    Some(segment[..digits_end].to_string())
 }
 
 #[cfg(test)]
