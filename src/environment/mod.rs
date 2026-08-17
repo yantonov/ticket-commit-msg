@@ -58,11 +58,10 @@ pub fn system_environment() -> Result<Environment, String> {
         executable: args.first().expect("executable is not defined").to_string(),
         commit_msg_tmp_file: {
             let arg1 = args.get(1);
+            let is_help_flag = matches!(arg1.map(String::as_str), Some("--help") | Some("-h"));
+            let names_an_existing_file = arg1.is_some_and(|a| Path::new(a).exists());
 
-            if (arg1.map(String::as_str) == Some("--help")
-                || arg1.map(String::as_str) == Some("-h"))
-                && !Path::new("--help").exists()
-            {
+            if is_help_flag && !names_an_existing_file {
                 None
             } else {
                 arg1.cloned()
