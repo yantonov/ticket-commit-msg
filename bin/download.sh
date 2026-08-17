@@ -41,11 +41,38 @@ echo "Downloading: ${DOWNLOAD_URL}"
 
 TMP_DIR="$(mktemp -d)"
 ARCHIVE_PATH="${TMP_DIR}/${EXECUTABLE_FILENAME}.tar.gz"
+CHECKSUM_PATH="${ARCHIVE_PATH}.sha256"
 
 echo $ARCHIVE_PATH
 
-# Download archive
+# Download archive and the checksum published next to it
 curl -fL "${DOWNLOAD_URL}" -o "${ARCHIVE_PATH}"
+curl -fL "${DOWNLOAD_URL}.sha256" -o "${CHECKSUM_PATH}"
+
+# Verify before unpacking: linux and git bash carry sha256sum, macos carries
+# shasum. Only the hash is compared, so the file name inside the checksum file
+# does not have to match the temporary one.
+if command -v sha256sum > /dev/null 2>&1; then
+  ACTUAL_CHECKSUM="$(sha256sum "${ARCHIVE_PATH}" | awk '{print $1}')"
+elif command -v shasum > /dev/null 2>&1; then
+  ACTUAL_CHECKSUM="$(shasum -a 256 "${ARCHIVE_PATH}" | awk '{print $1}')"
+else
+  echo "Neither sha256sum nor shasum is available to verify the download"
+  rm -rf "${TMP_DIR}"
+  exit 1
+fi
+
+EXPECTED_CHECKSUM="$(awk '{print $1}' "${CHECKSUM_PATH}")"
+
+if [ "${ACTUAL_CHECKSUM}" != "${EXPECTED_CHECKSUM}" ]; then
+  echo "Checksum mismatch for ${ARCHIVE_NAME}"
+  echo "  expected ${EXPECTED_CHECKSUM}"
+  echo "  actual   ${ACTUAL_CHECKSUM}"
+  rm -rf "${TMP_DIR}"
+  exit 1
+fi
+
+echo "Checksum ok: ${ACTUAL_CHECKSUM}"
 
 # Extract archive
 tar -xzf "${ARCHIVE_PATH}" -C "${TMP_DIR}"
