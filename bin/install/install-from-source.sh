@@ -6,7 +6,7 @@ cd "$(dirname "$0")/../.."
 
 EXECUTABLE_NAME="ticket-commit-msg"
 
-bin/dev/release.sh
+cargo build --release
 
 TARGET_DIR="${HOME}/.local/bin"
 mkdir -p "${TARGET_DIR}"
