@@ -10,7 +10,13 @@ const GIT_CONFIG_PREFIX_PARAM: &str = "custom.ticketnumberprefix";
 
 fn usage(env: &Environment) -> Result<(), String> {
     println!("ticket-commit-msg");
-    println!("version: {}", env!("CARGO_PKG_VERSION"));
+    // The commit comes from build.rs, so the line names the exact source the
+    // binary was built from without the version number alone having to be enough.
+    println!(
+        "version: {} ({})",
+        env!("CARGO_PKG_VERSION"),
+        env!("GIT_HASH")
+    );
     println!();
     println!("Usage: {} COMMIT_MESSAGE_FILE", env.executable_name());
     println!();
