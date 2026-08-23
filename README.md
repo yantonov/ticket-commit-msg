@@ -14,8 +14,9 @@ For JIRA you can create a branch based on current opened ticket another [tool](h
 1. [Mechanics](#mechanics)
 2. [Installation](#installation)
 3. [Customization](#customization)
-4. [Example](#example)
-5. [Links](#links)
+4. [Branch validation](#branch-validation)
+5. [Example](#example)
+6. [Links](#links)
 
 
 
@@ -69,6 +70,34 @@ Or you can set it in the environment variable `TICKET_PREFIX`.
 
 Then after you commit something while an active branch is QUEUE-123:  
 the following line will be added to the commit message: "Issue: QUEUE-123".
+
+## Branch validation
+To check whether a branch name would produce a ticket number, without touching any commit message:
+```
+> ticket-commit-msg --validate users/username/QUEUE-123_fix_the_thing
+branch:  users/username/QUEUE-123_fix_the_thing
+match:   yes
+ticket:  QUEUE-123
+line:    QUEUE-123
+```
+The `line:` value is exactly what would be added to the commit message, so the configured prefix is applied:
+```
+> git config custom.ticketnumberprefix 'JIRA: '
+> ticket-commit-msg --validate QUEUE-123
+branch:  QUEUE-123
+match:   yes
+ticket:  QUEUE-123
+line:    JIRA: QUEUE-123
+```
+The exit code is 0 when the branch name matches and non zero otherwise, which makes the command usable as a check in CI or in another hook:
+```
+> ticket-commit-msg --validate release/1.2.3
+branch:  release/1.2.3
+match:   no
+no ticket number found in branch name
+> echo $?
+1
+```
 
 ## Example
 ```

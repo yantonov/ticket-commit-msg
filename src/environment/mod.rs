@@ -3,9 +3,19 @@ use std::env;
 use std::path::{Path, PathBuf};
 
 pub const TICKET_PREFIX_ENV_VAR: &str = "TICKET_PREFIX";
+pub const VALIDATE_FLAG: &str = "--validate";
+
+pub enum Command {
+    ShowUsage,
+    // The branch is optional so that a missing argument can be reported as a
+    // run time error instead of silently falling back to the usage screen.
+    ValidateBranch(Option<String>),
+    PatchCommitMsg,
+}
 
 pub struct Environment {
     executable: String,
+    command: Command,
     commit_msg_tmp_file: Option<String>,
     prefix: Option<String>,
 }
@@ -34,8 +44,8 @@ impl Environment {
         self.prefix.clone()
     }
 
-    pub fn show_usage(&self) -> bool {
-        self.commit_msg_tmp_file.is_none()
+    pub fn command(&self) -> &Command {
+        &self.command
     }
 }
 
@@ -54,19 +64,22 @@ pub fn system_environment() -> Result<Environment, String> {
     };
     let ticket_prefix_from_env = env::var(TICKET_PREFIX_ENV_VAR).ok();
 
+    let arg1 = args.get(1);
+    // git always passes an existing path as the first argument, so a flag that
+    // happens to name a real file is still treated as a commit message file.
+    let names_an_existing_file = arg1.is_some_and(|a| Path::new(a).exists());
+    let command = match arg1.map(String::as_str) {
+        None => Command::ShowUsage,
+        Some(_) if names_an_existing_file => Command::PatchCommitMsg,
+        Some("--help") | Some("-h") => Command::ShowUsage,
+        Some(VALIDATE_FLAG) => Command::ValidateBranch(args.get(2).cloned()),
+        Some(_) => Command::PatchCommitMsg,
+    };
+
     Ok(Environment {
         executable: args.first().expect("executable is not defined").to_string(),
-        commit_msg_tmp_file: {
-            let arg1 = args.get(1);
-            let is_help_flag = matches!(arg1.map(String::as_str), Some("--help") | Some("-h"));
-            let names_an_existing_file = arg1.is_some_and(|a| Path::new(a).exists());
-
-            if is_help_flag && !names_an_existing_file {
-                None
-            } else {
-                arg1.cloned()
-            }
-        },
+        command,
+        commit_msg_tmp_file: arg1.cloned(),
         prefix: ticket_prefix_from_config.or(ticket_prefix_from_env),
     })
 }

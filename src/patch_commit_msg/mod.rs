@@ -70,6 +70,13 @@ fn prepare_prefix(prefix: String) -> String {
     }
 }
 
+// The line the hook would add to the commit message for the given ticket:
+// exposed so that --validate reports exactly what a commit would get.
+pub fn ticket_line(ticket_number: &str, ticket_prefix: &Option<String>) -> String {
+    let prepared_prefix = prepare_prefix(ticket_prefix.as_deref().unwrap_or("").to_string());
+    format!("{}{}", prepared_prefix, ticket_number)
+}
+
 fn try_patch(lines: &[String], prefix: &str, ticket_number: &str) -> PatchResult {
     if lines.is_empty() {
         return Append;
@@ -121,7 +128,7 @@ pub fn patch_commit_msg(
         Some(ticket) => {
             let prepared_prefix =
                 prepare_prefix(ticket_prefix.as_deref().unwrap_or("").to_string());
-            let new_line = format!("{}{}", prepared_prefix, ticket);
+            let new_line = ticket_line(ticket, ticket_prefix);
             let patch_result = try_patch(&lines, &prepared_prefix, &new_line);
             match patch_result {
                 DoNothing => {}

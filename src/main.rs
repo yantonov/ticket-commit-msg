@@ -1,4 +1,4 @@
-use environment::Environment;
+use environment::{Command, Environment};
 
 mod environment;
 mod file;
@@ -19,6 +19,17 @@ fn usage(env: &Environment) -> Result<(), String> {
     );
     println!();
     println!("Usage: {} COMMIT_MESSAGE_FILE", env.executable_name());
+    println!(
+        "       {} {} BRANCH",
+        env.executable_name(),
+        environment::VALIDATE_FLAG
+    );
+    println!();
+    println!(
+        "{} checks that the branch name contains a ticket",
+        environment::VALIDATE_FLAG
+    );
+    println!("number and exits with 0 when it does, 1 otherwise.");
     println!();
     println!("To set prefix for the ticket number:");
     println!("git config {} PREFIX_VALUE", GIT_CONFIG_PREFIX_PARAM);
@@ -41,12 +52,38 @@ fn adjust_commit_message(env: &Environment) -> Result<(), String> {
     Ok(())
 }
 
+fn validate_branch(env: &Environment, branch: &Option<String>) -> Result<(), String> {
+    let Some(branch) = branch else {
+        return Err(format!(
+            "branch name should be passed after {}",
+            environment::VALIDATE_FLAG
+        ));
+    };
+    let branch = branch.trim();
+    println!("branch:  {}", branch);
+    match ticket_number::ticket_number(branch) {
+        Some(ticket) => {
+            println!("match:   yes");
+            println!("ticket:  {}", ticket);
+            println!(
+                "line:    {}",
+                patch_commit_msg::ticket_line(&ticket, &env.prefix())
+            );
+            Ok(())
+        }
+        None => {
+            println!("match:   no");
+            Err("no ticket number found in branch name".to_string())
+        }
+    }
+}
+
 fn entry_point() -> Result<(), String> {
     let env = environment::system_environment()?;
-    if env.show_usage() {
-        usage(&env)
-    } else {
-        adjust_commit_message(&env)
+    match env.command() {
+        Command::ShowUsage => usage(&env),
+        Command::ValidateBranch(branch) => validate_branch(&env, branch),
+        Command::PatchCommitMsg => adjust_commit_message(&env),
     }
 }
 

@@ -234,3 +234,95 @@ fn a_missing_commit_message_file_is_reported_as_an_error() {
         stderr(&output)
     );
 }
+
+#[test]
+fn validate_accepts_a_branch_that_carries_a_ticket_number() {
+    let repo = Repo::new();
+
+    let output = repo
+        .hook()
+        .args(["--validate", "users/me/QUEUE-123_fix"])
+        .output()
+        .expect("the hook starts");
+
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(
+        "branch:  users/me/QUEUE-123_fix\nmatch:   yes\nticket:  QUEUE-123\nline:    QUEUE-123\n",
+        stdout(&output)
+    );
+}
+
+#[test]
+fn validate_reports_the_line_a_commit_would_get_including_the_prefix() {
+    let repo = Repo::new();
+    repo.set_config("custom.ticketnumberprefix", "JIRA: ");
+
+    let output = repo
+        .hook()
+        .args(["--validate", "QUEUE-123"])
+        .output()
+        .expect("the hook starts");
+
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert!(
+        stdout(&output).contains("line:    JIRA: QUEUE-123"),
+        "{}",
+        stdout(&output)
+    );
+}
+
+#[test]
+fn validate_rejects_a_branch_without_a_ticket_number() {
+    let repo = Repo::new();
+
+    let output = repo
+        .hook()
+        .args(["--validate", "chore/cleanup"])
+        .output()
+        .expect("the hook starts");
+
+    assert_eq!(Some(1), output.status.code());
+    assert_eq!("branch:  chore/cleanup\nmatch:   no\n", stdout(&output));
+    assert!(
+        stderr(&output).contains("no ticket number found in branch name"),
+        "{}",
+        stderr(&output)
+    );
+}
+
+#[test]
+fn validate_without_a_branch_is_reported_as_an_error() {
+    let repo = Repo::new();
+
+    let output = repo
+        .hook()
+        .arg("--validate")
+        .output()
+        .expect("the hook starts");
+
+    assert_eq!(Some(1), output.status.code());
+    assert!(
+        stderr(&output).contains("branch name should be passed"),
+        "{}",
+        stderr(&output)
+    );
+}
+
+// The same guard as the '-h' regression above: git passes an existing path as
+// the first argument, so a commit message file named '--validate' is a commit
+// message file.
+#[test]
+fn a_commit_message_file_literally_named_validate_flag_is_not_mistaken_for_the_flag() {
+    let repo = Repo::new();
+    repo.checkout("QUEUE-123");
+    let msg_file = repo.commit_msg_file("--validate", "Test commit");
+
+    let output = repo
+        .hook()
+        .arg("--validate")
+        .output()
+        .expect("the hook starts");
+
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!("Test commit\n\nQUEUE-123", repo.read(&msg_file));
+}
