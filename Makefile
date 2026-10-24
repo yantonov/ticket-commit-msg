@@ -2,39 +2,42 @@
 
 .DEFAULT_GOAL := help
 
-help: ## show help (public targets only)
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		grep -E "^(check|build|release|test|install):" | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-12s %s\n", $$1, $$2}'
+help:
+	@echo "Usage: make [target]"
+	@echo ""
+	@echo "  check    - Full verification (build + test)"
+	@echo "  build    - Build debug binary"
+	@echo "  release  - Build release binary"
+	@echo "  test     - Run all tests"
+	@echo "  install  - Build release and install to ~/.local/bin"
 	@echo ""
 	@echo "Run 'make help-all' for the full list, including internal targets."
 
-help-all: ## show help (all targets)
+help-all:
 	@echo "Public targets:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		grep -E "^(check|build|release|test|install):" | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-12s %s\n", $$1, $$2}'
+	@echo "  check    - Full verification (build + test)"
+	@echo "  build    - Build debug binary"
+	@echo "  release  - Build release binary"
+	@echo "  test     - Run all tests"
+	@echo "  install  - Build release and install to ~/.local/bin"
 	@echo ""
 	@echo "Internal targets:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		grep -vE "^(help|help-all|check|build|release|test|install):" | \
-		grep -E '^[a-zA-Z_-]+:.*?## .*$$' | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-12s %s\n", $$1, $$2}'
+	@echo "  outdated - List outdated dependencies"
 
-build: ## build debug binary
+build:
 	cargo build
 
-release: ## build release binary
+release:
 	cargo build --release
 
-test: ## run all tests
+test:
 	cargo test
 
-check: build test ## full verification (build + test)
+check: build test
 	@echo "ALL CHECKS PASSED"
 
-install: ## build release and install to ~/.local/bin
+install:
 	bin/install/install-from-source.sh
 
-outdated: ## list outdated dependencies
+outdated:
 	bin/support/find-outdated-dependencies.sh
